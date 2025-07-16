@@ -32,6 +32,11 @@ form input, form select, form textarea, form button {
   font-size: 1rem;
 }
 
+.form-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
 form button {
   background-color: #4CAF50;
   color: white;
@@ -42,6 +47,18 @@ form button {
 
 form button:hover {
   background-color: #45a049;
+}
+
+#cancel-edit {
+  background-color: #888;
+}
+
+#cancel-edit:hover {
+  background-color: #666;
+}
+
+.hidden {
+  display: none;
 }
 
 .book-list {
@@ -69,15 +86,24 @@ form button:hover {
   position: absolute;
   top: 10px;
   right: 10px;
+  display: flex;
+  gap: 0.5rem;
 }
 
-button.delete-btn {
-  background-color: #e74c3c;
-  color: white;
+button.delete-btn, button.edit-btn {
   border: none;
   padding: 0.3rem 0.6rem;
   border-radius: 4px;
   cursor: pointer;
+  color: white;
+}
+
+button.delete-btn {
+  background-color: #e74c3c;
+}
+
+button.edit-btn {
+  background-color: #3498db;
 }
 
 .filters {
@@ -85,4 +111,13 @@ button.delete-btn {
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+#undo-message {
+  background-color: #ffe9cc;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #f5b041;
+  border-radius: 5px;
 }
