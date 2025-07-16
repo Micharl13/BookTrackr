@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Book Trackr</title>
+  <title>BookTrackr</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>📚 My Book Tracker</h1>
+    <h1>📚 BookTrackr</h1>
 
     <form id="book-form">
       <input type="text" id="title" placeholder="Book Title" required />
@@ -20,7 +20,10 @@
       </select>
       <input type="number" id="rating" placeholder="Rating (1–5)" min="1" max="5" />
       <textarea id="notes" placeholder="Notes"></textarea>
-      <button type="submit">Add Book</button>
+      <div class="form-buttons">
+        <button type="submit">Add Book</button>
+        <button type="button" id="cancel-edit" class="hidden">Cancel</button>
+      </div>
     </form>
 
     <div class="filters">
@@ -31,7 +34,12 @@
         <option value="Reading">Reading</option>
         <option value="Finished">Finished</option>
       </select>
+
+      <button id="export-btn">Export</button>
+      <input type="file" id="import-file" accept=".json" />
     </div>
+
+    <div id="undo-message" class="hidden">Book deleted. <button id="undo-btn">Undo</button></div>
 
     <div id="book-list" class="book-list"></div>
   </div>
