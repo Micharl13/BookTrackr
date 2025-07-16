@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>📚 My Book Tracker</h1>
+
+    <form id="book-form">
+      <input type="text" id="title" placeholder="Book Title" required />
+      <input type="text" id="author" placeholder="Author" required />
+      <select id="status">
+        <option value="To Read">To Read</option>
+        <option value="Reading">Reading</option>
+        <option value="Finished">Finished</option>
+      </select>
+      <input type="number" id="rating" placeholder="Rating (1–5)" min="1" max="5" />
+      <textarea id="notes" placeholder="Notes"></textarea>
+      <button type="submit">Add Book</button>
+    </form>
+
+    <div class="filters">
+      <label for="filter-status">Filter:</label>
+      <select id="filter-status">
+        <option value="All">All</option>
+        <option value="To Read">To Read</option>
+        <option value="Reading">Reading</option>
+        <option value="Finished">Finished</option>
+      </select>
+    </div>
+
+    <div id="book-list" class="book-list"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
