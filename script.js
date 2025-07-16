@@ -1,156 +1,142 @@
-const form = document.getElementById('book-form');
-const bookList = document.getElementById('book-list');
-const filterStatus = document.getElementById('filter-status');
-const cancelEditBtn = document.getElementById('cancel-edit');
-const undoMessage = document.getElementById('undo-message');
-const undoBtn = document.getElementById('undo-btn');
-const exportBtn = document.getElementById('export-btn');
-const importFile = document.getElementById('import-file');
-
-let books = JSON.parse(localStorage.getItem('books')) || [];
+let books = JSON.parse(localStorage.getItem("books") || "[]");
 let editingIndex = null;
-let lastDeletedBook = null;
-let lastDeletedIndex = null;
-let undoTimeout = null;
 
-function renderBooks(filter = 'All') {
-  bookList.innerHTML = '';
-  const filtered = filter === 'All' ? books : books.filter(book => book.status === filter);
+const form = document.getElementById("book-form");
+const cancelEditBtn = document.getElementById("cancel-edit");
+const bookList = document.getElementById("book-list");
+const searchInput = document.getElementById("search");
+const sortSelect = document.getElementById("sort");
+const filterSelect = document.getElementById("filter-status");
+const themeBtn = document.getElementById("toggle-theme");
 
+function saveBooks() {
+  localStorage.setItem("books", JSON.stringify(books));
+}
+
+function renderBooks() {
+  let filtered = books.filter(book =>
+    book.title.toLowerCase().includes(searchInput.value.toLowerCase()) ||
+    book.author.toLowerCase().includes(searchInput.value.toLowerCase()) ||
+    (book.notes || "").toLowerCase().includes(searchInput.value.toLowerCase())
+  );
+
+  if (filterSelect.value !== "All") {
+    filtered = filtered.filter(book => book.status === filterSelect.value);
+  }
+
+  if (sortSelect.value !== "default") {
+    filtered.sort((a, b) => {
+      if (sortSelect.value === "rating" || sortSelect.value === "date") {
+        return b[sortSelect.value] - a[sortSelect.value];
+      }
+      return a[sortSelect.value].localeCompare(b[sortSelect.value]);
+    });
+  }
+
+  bookList.innerHTML = "";
   filtered.forEach((book, index) => {
-    const bookEl = document.createElement('div');
-    bookEl.className = 'book';
-    bookEl.innerHTML = `
+    const div = document.createElement("div");
+    div.className = "book";
+    div.innerHTML = `
+      ${book.cover ? `<img src="${book.cover}" alt="Cover" />` : ""}
       <h3>${book.title}</h3>
       <p><strong>Author:</strong> ${book.author}</p>
       <p><strong>Status:</strong> ${book.status}</p>
-      ${book.rating ? `<p><strong>Rating:</strong> ${book.rating} ⭐️</p>` : ''}
-      ${book.notes ? `<p><strong>Notes:</strong> ${book.notes}</p>` : ''}
-      <div class="actions">
-        <button class="edit-btn" onclick="editBook(${index})">Edit</button>
-        <button class="delete-btn" onclick="deleteBook(${index})">Delete</button>
+      <p><strong>Rating:</strong> ${book.rating || "N/A"}</p>
+      <p><strong>Genre:</strong> ${book.genre || "N/A"}</p>
+      <p><strong>Pages:</strong> ${book.pages || "N/A"}</p>
+      <p><strong>Notes:</strong> ${book.notes || ""}</p>
+      <div class="book-actions">
+        <button onclick="editBook(${index})">✏️</button>
+        <button onclick="deleteBook(${index})">🗑️</button>
       </div>
     `;
-    bookList.appendChild(bookEl);
+    bookList.appendChild(div);
   });
 }
 
-function addOrUpdateBook(e) {
+form.onsubmit = e => {
   e.preventDefault();
-  const title = document.getElementById('title').value.trim();
-  const author = document.getElementById('author').value.trim();
-  const status = document.getElementById('status').value;
-  const rating = document.getElementById('rating').value;
-  const notes = document.getElementById('notes').value.trim();
+  const newBook = {
+    title: form.title.value,
+    author: form.author.value,
+    genre: form.genre.value,
+    pages: form.pages.value,
+    status: form.status.value,
+    rating: form.rating.value,
+    notes: form.notes.value,
+    cover: form["cover-url"].value,
+    date: Date.now()
+  };
 
-  const newBook = { title, author, status, rating, notes };
-
-  if (editingIndex === null) {
-    books.push(newBook);
-  } else {
+  if (editingIndex !== null) {
     books[editingIndex] = newBook;
     editingIndex = null;
-    form.querySelector('button[type="submit"]').textContent = 'Add Book';
-    cancelEditBtn.classList.add('hidden');
+  } else {
+    books.push(newBook);
   }
 
-  localStorage.setItem('books', JSON.stringify(books));
-  renderBooks(filterStatus.value);
   form.reset();
-}
+  saveBooks();
+  renderBooks();
+};
 
-function deleteBook(index) {
-  const confirmDelete = confirm('Are you sure you want to delete this book?');
-  if (!confirmDelete) return;
-
-  lastDeletedBook = books[index];
-  lastDeletedIndex = index;
-  books.splice(index, 1);
-  localStorage.setItem('books', JSON.stringify(books));
-  renderBooks(filterStatus.value);
-
-  undoMessage.classList.remove('hidden');
-  clearTimeout(undoTimeout);
-  undoTimeout = setTimeout(() => {
-    lastDeletedBook = null;
-    lastDeletedIndex = null;
-    undoMessage.classList.add('hidden');
-  }, 5000);
-}
-
-function undoDelete() {
-  if (lastDeletedBook !== null && lastDeletedIndex !== null) {
-    books.splice(lastDeletedIndex, 0, lastDeletedBook);
-    localStorage.setItem('books', JSON.stringify(books));
-    renderBooks(filterStatus.value);
-    lastDeletedBook = null;
-    lastDeletedIndex = null;
-    undoMessage.classList.add('hidden');
-    clearTimeout(undoTimeout);
-  }
-}
+cancelEditBtn.onclick = () => {
+  editingIndex = null;
+  form.reset();
+};
 
 function editBook(index) {
   const book = books[index];
-  document.getElementById('title').value = book.title;
-  document.getElementById('author').value = book.author;
-  document.getElementById('status').value = book.status;
-  document.getElementById('rating').value = book.rating;
-  document.getElementById('notes').value = book.notes;
-
+  form.title.value = book.title;
+  form.author.value = book.author;
+  form.genre.value = book.genre;
+  form.pages.value = book.pages;
+  form.status.value = book.status;
+  form.rating.value = book.rating;
+  form.notes.value = book.notes;
+  form["cover-url"].value = book.cover;
   editingIndex = index;
-  form.querySelector('button[type="submit"]').textContent = 'Update Book';
-  cancelEditBtn.classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function cancelEditing() {
-  editingIndex = null;
-  form.reset();
-  form.querySelector('button[type="submit"]').textContent = 'Add Book';
-  cancelEditBtn.classList.add('hidden');
+function deleteBook(index) {
+  if (confirm("Are you sure you want to delete this book?")) {
+    books.splice(index, 1);
+    saveBooks();
+    renderBooks();
+  }
 }
 
-function exportBooks() {
-  const dataStr = JSON.stringify(books, null, 2);
-  const blob = new Blob([dataStr], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'booktrackr_export.json';
-  document.body.appendChild(a);
+document.getElementById("export-json").onclick = () => {
+  const blob = new Blob([JSON.stringify(books, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "books.json";
   a.click();
-  document.body.removeChild(a);
-}
+};
 
-function importBooks(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
+document.getElementById("import-json").onchange = e => {
+  const file = e.target.files[0];
   const reader = new FileReader();
-  reader.onload = function (e) {
+  reader.onload = () => {
     try {
-      const importedBooks = JSON.parse(e.target.result);
-      if (Array.isArray(importedBooks)) {
-        books = importedBooks;
-        localStorage.setItem('books', JSON.stringify(books));
-        renderBooks(filterStatus.value);
-      } else {
-        alert('Invalid file format.');
-      }
-    } catch (err) {
-      alert('Error reading file.');
+      books = JSON.parse(reader.result);
+      saveBooks();
+      renderBooks();
+    } catch {
+      alert("Invalid JSON file.");
     }
   };
   reader.readAsText(file);
-}
+};
 
-form.addEventListener('submit', addOrUpdateBook);
-cancelEditBtn.addEventListener('click', cancelEditing);
-filterStatus.addEventListener('change', () => renderBooks(filterStatus.value));
-undoBtn.addEventListener('click', undoDelete);
-exportBtn.addEventListener('click', exportBooks);
-importFile.addEventListener('change', importBooks);
+themeBtn.onclick = () => {
+  document.body.classList.toggle("dark");
+};
 
-// Initial render
+searchInput.oninput = renderBooks;
+sortSelect.onchange = renderBooks;
+filterSelect.onchange = renderBooks;
+
 renderBooks();
