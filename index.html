@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BookTrackr</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -10,38 +10,48 @@
   <div class="container">
     <h1>📚 BookTrackr</h1>
 
-    <form id="book-form">
-      <input type="text" id="title" placeholder="Book Title" required />
-      <input type="text" id="author" placeholder="Author" required />
-      <select id="status">
-        <option value="To Read">To Read</option>
-        <option value="Reading">Reading</option>
-        <option value="Finished">Finished</option>
+    <div class="controls">
+      <input type="text" id="search" placeholder="Search books..." />
+      <select id="sort">
+        <option value="default">Sort By</option>
+        <option value="title">Title</option>
+        <option value="author">Author</option>
+        <option value="rating">Rating</option>
+        <option value="status">Status</option>
+        <option value="date">Date Added</option>
       </select>
-      <input type="number" id="rating" placeholder="Rating (1–5)" min="1" max="5" />
-      <textarea id="notes" placeholder="Notes"></textarea>
-      <div class="form-buttons">
-        <button type="submit">Add Book</button>
-        <button type="button" id="cancel-edit" class="hidden">Cancel</button>
-      </div>
-    </form>
-
-    <div class="filters">
-      <label for="filter-status">Filter:</label>
       <select id="filter-status">
         <option value="All">All</option>
         <option value="To Read">To Read</option>
         <option value="Reading">Reading</option>
         <option value="Finished">Finished</option>
       </select>
-
-      <button id="export-btn">Export</button>
-      <input type="file" id="import-file" accept=".json" />
+      <button id="toggle-theme">🌓</button>
     </div>
 
-    <div id="undo-message" class="hidden">Book deleted. <button id="undo-btn">Undo</button></div>
+    <form id="book-form">
+      <input type="text" id="title" placeholder="Book Title" required />
+      <input type="text" id="author" placeholder="Author" required />
+      <input type="text" id="genre" placeholder="Genre / Tags" />
+      <input type="number" id="pages" placeholder="Pages Read / Total" />
+      <select id="status">
+        <option value="To Read">To Read</option>
+        <option value="Reading">Reading</option>
+        <option value="Finished">Finished</option>
+      </select>
+      <input type="number" id="rating" placeholder="Rating (1–5)" min="1" max="5" />
+      <textarea id="notes" placeholder="Notes..."></textarea>
+      <input type="url" id="cover-url" placeholder="Cover Image URL" />
+      <button type="submit">Add / Save Book</button>
+      <button type="button" id="cancel-edit">Cancel Edit</button>
+    </form>
 
-    <div id="book-list" class="book-list"></div>
+    <div class="import-export">
+      <button id="export-json">Export JSON</button>
+      <input type="file" id="import-json" accept=".json" />
+    </div>
+
+    <div id="book-list"></div>
   </div>
 
   <script src="script.js"></script>
