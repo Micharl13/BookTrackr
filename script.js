@@ -1,181 +1,158 @@
-let books = JSON.parse(localStorage.getItem("books") || "[]");
+let books = JSON.parse(localStorage.getItem("books")) || [];
 let editingIndex = null;
 
-const form = document.getElementById("book-form");
-const cancelEditBtn = document.getElementById("cancel-edit");
+const bookForm = document.getElementById("book-form");
 const bookList = document.getElementById("book-list");
-const searchInput = document.getElementById("search");
+const coverURL = document.getElementById("cover-url");
+const coverPreview = document.getElementById("cover-preview");
+const cancelEditBtn = document.getElementById("cancel-edit");
 const sortSelect = document.getElementById("sort");
 const filterSelect = document.getElementById("filter-status");
-const themeBtn = document.getElementById("toggle-theme");
-const preview = document.getElementById("cover-preview");
+const searchInput = document.getElementById("search");
 
 function saveBooks() {
   localStorage.setItem("books", JSON.stringify(books));
 }
 
-function createProgressBar(pages) {
-  if (!pages || !pages.includes("/")) return "";
-  const [read, total] = pages.split("/").map(Number);
-  if (isNaN(read) || isNaN(total) || total <= 0) return "";
-  const percent = Math.min((read / total) * 100, 100);
-  return `
-    <div class="progress-bar">
-      <div class="progress" style="width:${percent}%;"></div>
-    </div>`;
-}
-
 function renderBooks() {
-  let filtered = books.filter(book =>
-    book.title.toLowerCase().includes(searchInput.value.toLowerCase()) ||
-    book.author.toLowerCase().includes(searchInput.value.toLowerCase()) ||
-    (book.notes || "").toLowerCase().includes(searchInput.value.toLowerCase())
-  );
+  let filteredBooks = [...books];
 
-  if (filterSelect.value !== "All") {
-    filtered = filtered.filter(book => book.status === filterSelect.value);
+  // Filter
+  const status = filterSelect.value;
+  if (status !== "All") {
+    filteredBooks = filteredBooks.filter(b => b.status === status);
   }
 
-  if (sortSelect.value !== "default") {
-    filtered.sort((a, b) => {
-      if (sortSelect.value === "rating" || sortSelect.value === "date") {
-        return (b[sortSelect.value] || 0) - (a[sortSelect.value] || 0);
+  // Search
+  const searchTerm = searchInput.value.toLowerCase();
+  if (searchTerm) {
+    filteredBooks = filteredBooks.filter(b =>
+      b.title.toLowerCase().includes(searchTerm) ||
+      b.author.toLowerCase().includes(searchTerm) ||
+      b.series?.toLowerCase().includes(searchTerm) ||
+      b.genre?.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  // Sort
+  const sortValue = sortSelect.value;
+  if (sortValue !== "default") {
+    filteredBooks.sort((a, b) => {
+      if (sortValue === "rating" || sortValue === "bookNumber") {
+        return (b[sortValue] || 0) - (a[sortValue] || 0);
+      } else if (sortValue === "date") {
+        return new Date(b.dateAdded) - new Date(a.dateAdded);
+      } else {
+        return (a[sortValue] || "").localeCompare(b[sortValue] || "");
       }
-      return (a[sortSelect.value] || "").localeCompare(b[sortSelect.value] || "");
     });
   }
 
+  // Render
   bookList.innerHTML = "";
-  filtered.forEach((book, index) => {
+  filteredBooks.forEach((book, index) => {
     const div = document.createElement("div");
     div.className = "book";
+
+    const progress = parsePages(book.pages);
+    const stars = "★".repeat(book.rating || 0) + "☆".repeat(5 - (book.rating || 0));
+    const badgeClass = book.status ? `status-${book.status.replace(" ", "\\ ")}` : "";
+
     div.innerHTML = `
-      ${book.cover ? `<img src="${book.cover}" alt="Cover" onerror="this.style.display='none'" />` : ""}
+      <img src="${book.cover || ''}" alt="${book.title}" />
       <h3>${book.title}</h3>
-      <h2><strong>Author:</strong> ${book.author}</h2>
-      <p><strong>Series:</strong> ${book.series}</p>
-      <p><strong>Book Number:</strong> ${book.bookNumber}</p>
-      <p><strong>Status:</strong> ${book.status}</p>
-      <p><strong>Rating:</strong> ${book.rating || "N/A"}</p>
-      <p><strong>Genre:</strong> ${book.genre || "N/A"}</p>
-      <p><strong>Pages:</strong> ${book.pages || "N/A"}</p>
-      <p><strong>Notes:</strong> ${book.notes || ""}</p>
-      ${createProgressBar(book.pages)}
+      <p><strong>Author:</strong> ${book.author}</p>
+      <p><strong>Series:</strong> ${book.series || "—"} #${book.bookNumber || "—"}</p>
+      <p><strong>Genre:</strong> ${book.genre || "—"}</p>
+      <div class="progress-bar"><div class="progress" style="width:${progress}%"></div></div>
+      <div class="stars">${stars}</div>
+      <span class="status-badge ${badgeClass}">${book.status}</span>
       <div class="book-actions">
-        <button onclick="editBook(${index})">✏️</button>
-        <button onclick="deleteBook(${index})">🗑️</button>
+        <button onclick="editBook(${index})">✏️ Edit</button>
+        <button onclick="deleteBook(${index})">🗑️ Delete</button>
       </div>
     `;
     bookList.appendChild(div);
   });
 }
 
-form.onsubmit = e => {
+function parsePages(pages) {
+  const match = pages?.match(/(\d+)\s*\/\s*(\d+)/);
+  if (!match) return 0;
+  const read = parseInt(match[1], 10);
+  const total = parseInt(match[2], 10);
+  return total > 0 ? Math.min((read / total) * 100, 100) : 0;
+}
+
+bookForm.addEventListener("submit", e => {
   e.preventDefault();
-  const newBook = {
-    title: form.title.value.trim(),
-    author: form.author.value.trim(),
-    series: form.series.value.trim(),
-    bookNumber: form.bookNumber.value.trim(),
-    genre: form.genre.value.trim(),
-    pages: form.pages.value.trim(),
-    status: form.status.value,
-    rating: form.rating.value,
-    notes: form.notes.value.trim(),
-    cover: form["cover-url"].value.trim(),
-    date: Date.now()
+  const book = {
+    title: bookForm.title.value,
+    author: bookForm.author.value,
+    series: bookForm.series.value,
+    bookNumber: bookForm.bookNumber.value,
+    genre: bookForm.genre.value,
+    pages: bookForm.pages.value,
+    status: bookForm.status.value,
+    rating: parseInt(bookForm.rating.value),
+    notes: bookForm.notes.value,
+    cover: bookForm.coverURL.value,
+    dateAdded: new Date().toISOString()
   };
-
-  if (!newBook.title || !newBook.author) {
-    form.classList.add("error");
-    setTimeout(() => form.classList.remove("error"), 500);
-    return;
-  }
-
   if (editingIndex !== null) {
-    books[editingIndex] = newBook;
+    books[editingIndex] = book;
     editingIndex = null;
   } else {
-    books.push(newBook);
+    books.push(book);
   }
-
-  form.reset();
-  preview.classList.add("hidden");
+  bookForm.reset();
+  coverPreview.classList.add("hidden");
   saveBooks();
   renderBooks();
-};
-
-cancelEditBtn.onclick = () => {
-  editingIndex = null;
-  form.reset();
-  preview.classList.add("hidden");
-};
+});
 
 function editBook(index) {
   const book = books[index];
-  form.title.value = book.title;
-  form.author.value = book.author;
-  form.series.value = book.series;
-  form.bookNumber.value = book.bookNumber;
-  form.genre.value = book.genre;
-  form.pages.value = book.pages;
-  form.status.value = book.status;
-  form.rating.value = book.rating;
-  form.notes.value = book.notes;
-  form["cover-url"].value = book.cover;
-  preview.src = book.cover;
-  preview.classList.remove("hidden");
+  bookForm.title.value = book.title;
+  bookForm.author.value = book.author;
+  bookForm.series.value = book.series;
+  bookForm.bookNumber.value = book.bookNumber;
+  bookForm.genre.value = book.genre;
+  bookForm.pages.value = book.pages;
+  bookForm.status.value = book.status;
+  bookForm.rating.value = book.rating;
+  bookForm.notes.value = book.notes;
+  bookForm.coverURL.value = book.cover;
+  coverPreview.src = book.cover;
+  coverPreview.classList.remove("hidden");
   editingIndex = index;
-  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+cancelEditBtn.addEventListener("click", () => {
+  bookForm.reset();
+  editingIndex = null;
+  coverPreview.classList.add("hidden");
+});
+
 function deleteBook(index) {
-  if (confirm("Delete this book?")) {
+  if (confirm("Sure you want to delete this book?")) {
     books.splice(index, 1);
     saveBooks();
     renderBooks();
   }
 }
 
-document.getElementById("export-json").onclick = () => {
-  const blob = new Blob([JSON.stringify(books, null, 2)], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "books.json";
-  a.click();
-};
-
-document.getElementById("import-json").onchange = e => {
-  const file = e.target.files[0];
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      books = JSON.parse(reader.result);
-      saveBooks();
-      renderBooks();
-    } catch {
-      alert("Invalid JSON file.");
-    }
-  };
-  reader.readAsText(file);
-};
-
-themeBtn.onclick = () => {
-  document.body.classList.toggle("dark");
-};
-
-form["cover-url"].addEventListener("input", () => {
-  const url = form["cover-url"].value.trim();
-  if (url) {
-    preview.src = url;
-    preview.classList.remove("hidden");
+coverURL.addEventListener("input", () => {
+  if (coverURL.value.trim()) {
+    coverPreview.src = coverURL.value;
+    coverPreview.classList.remove("hidden");
   } else {
-    preview.classList.add("hidden");
+    coverPreview.classList.add("hidden");
   }
 });
 
-searchInput.oninput = renderBooks;
-sortSelect.onchange = renderBooks;
-filterSelect.onchange = renderBooks;
+sortSelect.addEventListener("change", renderBooks);
+filterSelect.addEventListener("change", renderBooks);
+searchInput.addEventListener("input", renderBooks);
 
 renderBooks();
