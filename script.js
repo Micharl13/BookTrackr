@@ -433,3 +433,16 @@ document.addEventListener("DOMContentLoaded", () => {
   loadBooks();
   renderBooks();
 });
+
+// Also initialize if DOM is already loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+  initializeApp();
+}
+
+function initializeApp() {
+  loadTheme();
+  loadBooks();
+  renderBooks();
+}
