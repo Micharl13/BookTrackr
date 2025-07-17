@@ -19,6 +19,12 @@ const pagination = document.getElementById("pagination-controls");
 const exportBtn = document.getElementById("export-json");
 const importInput = document.getElementById("import-json");
 
+// Notes modal elements
+const notesModal = document.getElementById("notes-modal");
+const modalBookTitle = document.getElementById("modal-book-title");
+const modalNotesContent = document.getElementById("modal-notes-content");
+const closeNotesModal = document.getElementById("close-notes-modal");
+
 // Load books from localStorage on page load
 function loadBooks() {
   const saved = localStorage.getItem("books");
@@ -121,6 +127,27 @@ function renderTags(tags) {
   return `<div class="tags">${tagElements}</div>`;
 }
 
+// Show notes modal
+function showNotes(index) {
+  const book = books[index];
+  modalBookTitle.textContent = `Notes: ${book.title}`;
+  
+  if (book.notes && book.notes.trim()) {
+    modalNotesContent.textContent = book.notes;
+    modalNotesContent.classList.remove('no-notes');
+  } else {
+    modalNotesContent.textContent = "No notes available for this book.";
+    modalNotesContent.classList.add('no-notes');
+  }
+  
+  notesModal.classList.remove('hidden');
+}
+
+// Close notes modal
+function closeNotes() {
+  notesModal.classList.add('hidden');
+}
+
 function renderBooks() {
   let filtered = [...books];
 
@@ -208,6 +235,7 @@ function renderBooks() {
           <span class="status-badge ${badgeClass}">${book.status}</span>
           ${tagsHtml}
           <div class="book-actions">
+            <button onclick="showNotes(${originalIndex})">📝 Notes</button>
             <button onclick="editBook(${originalIndex})">✏️ Edit</button>
             <button onclick="deleteBook(${originalIndex})">🗑️ Delete</button>
           </div>`;
@@ -355,94 +383,4 @@ function editBook(index) {
   document.getElementById("series").value = book.series || "";
   document.getElementById("bookNumber").value = book.bookNumber || "";
   document.getElementById("genre").value = book.genre || "";
-  document.getElementById("tags").value = book.tags ? book.tags.join(', ') : "";
-  document.getElementById("pages").value = book.pages || "";
-  document.getElementById("status").value = book.status;
-  document.getElementById("rating").value = book.rating || "";
-  document.getElementById("notes").value = book.notes || "";
-  document.getElementById("cover-url").value = book.cover || "";
-  
-  if (book.cover) {
-    coverPreview.src = book.cover;
-    coverPreview.classList.remove("hidden");
-  }
-  
-  editingIndex = index;
-  bookForm.classList.remove("hidden");
-  document.getElementById("title").focus();
-}
-
-// Event listeners for filters and search
-[sortSelect, filterSelect].forEach(el => {
-  el.addEventListener("change", () => {
-    currentPage = 1;
-    renderBooks();
-  });
-});
-
-searchInput.addEventListener("input", () => {
-  currentPage = 1;
-  renderBooks();
-});
-
-// Theme toggle
-themeToggle.addEventListener("click", () => {
-  document.body.classList.toggle("dark");
-  localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
-});
-
-// Export functionality
-exportBtn.addEventListener("click", () => {
-  const dataStr = JSON.stringify(books, null, 2);
-  const dataBlob = new Blob([dataStr], { type: "application/json" });
-  const url = URL.createObjectURL(dataBlob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "booktrackr-export.json";
-  link.click();
-  URL.revokeObjectURL(url);
-});
-
-// Import functionality
-importInput.addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const imported = JSON.parse(e.target.result);
-      if (Array.isArray(imported)) {
-        books = imported;
-        saveBooks();
-        renderBooks();
-        alert("Books imported successfully!");
-      } else {
-        alert("Invalid file format. Please select a valid JSON file.");
-      }
-    } catch (error) {
-      alert("Error reading file. Please make sure it's a valid JSON file.");
-    }
-  };
-  reader.readAsText(file);
-});
-
-// Initialize app
-document.addEventListener("DOMContentLoaded", () => {
-  loadTheme();
-  loadBooks();
-  renderBooks();
-});
-
-// Also initialize if DOM is already loaded
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeApp);
-} else {
-  initializeApp();
-}
-
-function initializeApp() {
-  loadTheme();
-  loadBooks();
-  renderBooks();
-}
+  document.getElementById("tags").value = book.
