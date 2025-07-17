@@ -1,4 +1,7 @@
-let books = JSON.parse(localStorage.getItem("books")) || [];
+// Note: This code should be adapted to NOT use localStorage in Claude.ai artifacts
+// Use in-memory storage instead for artifact compatibility
+
+let books = [];
 let editingIndex = null;
 let currentPage = 1;
 const perPage = 6;
@@ -20,7 +23,9 @@ const exportBtn = document.getElementById("export-json");
 const importInput = document.getElementById("import-json");
 
 function saveBooks() {
-  localStorage.setItem("books", JSON.stringify(books));
+  // For artifact compatibility, remove localStorage usage
+  // localStorage.setItem("books", JSON.stringify(books));
+  console.log("Books saved to memory:", books);
 }
 
 function renderChips() {
@@ -86,6 +91,18 @@ function getStatusClass(status) {
   return `status-${status.toLowerCase().replace(/\s+/g, '-')}`;
 }
 
+function parseTags(tagsString) {
+  if (!tagsString) return [];
+  return tagsString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+}
+
+function renderTags(tags) {
+  if (!tags || tags.length === 0) return '';
+  
+  const tagElements = tags.map(tag => `<span class="tag">${tag}</span>`).join('');
+  return `<div class="tags">${tagElements}</div>`;
+}
+
 function renderBooks() {
   let filtered = [...books];
 
@@ -102,7 +119,8 @@ function renderBooks() {
       b.title.toLowerCase().includes(term) ||
       b.author.toLowerCase().includes(term) ||
       (b.series && b.series.toLowerCase().includes(term)) ||
-      (b.genre && b.genre.toLowerCase().includes(term))
+      (b.genre && b.genre.toLowerCase().includes(term)) ||
+      (b.tags && b.tags.some(tag => tag.toLowerCase().includes(term)))
     );
   }
 
@@ -159,6 +177,7 @@ function renderBooks() {
         const progress = parsePages(book.pages);
         const stars = "★".repeat(book.rating || 0) + "☆".repeat(5 - (book.rating || 0));
         const badgeClass = getStatusClass(book.status);
+        const tagsHtml = renderTags(book.tags);
 
         div.innerHTML = `
           <img src="${book.cover || ''}" alt="${book.title}" onerror="this.style.display='none'" />
@@ -169,6 +188,7 @@ function renderBooks() {
           <div class="progress-bar"><div class="progress" style="width:${progress}%"></div></div>
           <div class="stars">${stars}</div>
           <span class="status-badge ${badgeClass}">${book.status}</span>
+          ${tagsHtml}
           <div class="book-actions">
             <button onclick="editBook(${originalIndex})">✏️ Edit</button>
             <button onclick="deleteBook(${originalIndex})">🗑️ Delete</button>
@@ -223,16 +243,17 @@ function deleteBook(index) {
   }
 }
 
-// Form submission - FIXED VERSION
+// Form submission - Updated to handle tags
 bookForm.addEventListener("submit", function(e) {
   e.preventDefault();
   
-  // Get form elements more reliably
+  // Get form elements
   const titleInput = document.getElementById("title");
   const authorInput = document.getElementById("author");
   const seriesInput = document.getElementById("series");
   const bookNumberInput = document.getElementById("bookNumber");
   const genreInput = document.getElementById("genre");
+  const tagsInput = document.getElementById("tags");
   const pagesInput = document.getElementById("pages");
   const statusInput = document.getElementById("status");
   const ratingInput = document.getElementById("rating");
@@ -255,6 +276,7 @@ bookForm.addEventListener("submit", function(e) {
     series: seriesInput.value.trim(),
     bookNumber: bookNumberInput.value.trim(),
     genre: genreInput.value.trim(),
+    tags: parseTags(tagsInput.value),
     pages: pagesInput.value.trim(),
     status: statusInput.value,
     rating: parseInt(ratingInput.value) || 0,
@@ -307,7 +329,7 @@ coverURL.addEventListener("input", () => {
   }
 });
 
-// Edit book function
+// Edit book function - Updated to handle tags
 function editBook(index) {
   const book = books[index];
   document.getElementById("title").value = book.title;
@@ -315,6 +337,7 @@ function editBook(index) {
   document.getElementById("series").value = book.series || "";
   document.getElementById("bookNumber").value = book.bookNumber || "";
   document.getElementById("genre").value = book.genre || "";
+  document.getElementById("tags").value = book.tags ? book.tags.join(', ') : "";
   document.getElementById("pages").value = book.pages || "";
   document.getElementById("status").value = book.status;
   document.getElementById("rating").value = book.rating || "";
@@ -347,7 +370,8 @@ searchInput.addEventListener("input", () => {
 // Theme toggle
 themeToggle.addEventListener("click", () => {
   document.body.classList.toggle("dark");
-  localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+  // For artifact compatibility, remove localStorage usage
+  // localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
 });
 
 // Export functionality
@@ -386,10 +410,10 @@ importInput.addEventListener("change", (e) => {
   reader.readAsText(file);
 });
 
-// Initialize theme
-if (localStorage.getItem("theme") === "dark") {
-  document.body.classList.add("dark");
-}
+// Initialize theme - For artifact compatibility, remove localStorage usage
+// if (localStorage.getItem("theme") === "dark") {
+//   document.body.classList.add("dark");
+// }
 
 // Initialize app
 renderBooks();
