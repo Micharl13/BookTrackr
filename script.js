@@ -25,6 +25,14 @@ const modalBookTitle = document.getElementById("modal-book-title");
 const modalNotesContent = document.getElementById("modal-notes-content");
 const closeNotesModal = document.getElementById("close-notes-modal");
 
+// Initialize the application
+function init() {
+  loadBooks();
+  loadTheme();
+  setupEventListeners();
+  renderBooks();
+}
+
 // Load books from localStorage on page load
 function loadBooks() {
   const saved = localStorage.getItem("books");
@@ -50,6 +58,82 @@ function loadTheme() {
   if (savedTheme === "dark") {
     document.body.classList.add("dark");
   }
+}
+
+function saveTheme() {
+  const theme = document.body.classList.contains("dark") ? "dark" : "light";
+  localStorage.setItem("theme", theme);
+}
+
+// Setup all event listeners
+function setupEventListeners() {
+  // Search functionality
+  searchInput.addEventListener("input", () => {
+    currentPage = 1;
+    renderBooks();
+  });
+
+  // Sort functionality
+  sortSelect.addEventListener("change", () => {
+    currentPage = 1;
+    renderBooks();
+  });
+
+  // Filter functionality
+  filterSelect.addEventListener("change", () => {
+    currentPage = 1;
+    renderBooks();
+  });
+
+  // Theme toggle
+  themeToggle.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+    saveTheme();
+  });
+
+  // Export functionality
+  exportBtn.addEventListener("click", exportBooks);
+
+  // Import functionality
+  importInput.addEventListener("change", importBooks);
+
+  // Modal event listeners
+  closeNotesModal.addEventListener("click", closeNotes);
+  notesModal.addEventListener("click", (e) => {
+    if (e.target === notesModal) {
+      closeNotes();
+    }
+  });
+
+  // Form submission
+  bookForm.addEventListener("submit", handleFormSubmit);
+
+  // Show form button
+  showFormBtn.addEventListener("click", () => {
+    bookForm.classList.toggle("hidden");
+    if (!bookForm.classList.contains("hidden")) {
+      document.getElementById("title").focus();
+    }
+  });
+
+  // Cancel edit button
+  cancelEditBtn.addEventListener("click", () => {
+    bookForm.reset();
+    editingIndex = null;
+    bookForm.classList.add("hidden");
+    coverPreview.classList.add("hidden");
+  });
+
+  // Cover URL preview
+  coverURL.addEventListener("input", () => {
+    const url = coverURL.value.trim();
+    if (url) {
+      coverPreview.src = url;
+      coverPreview.classList.remove("hidden");
+    } else {
+      coverPreview.classList.add("hidden");
+    }
+  });
 }
 
 function renderChips() {
@@ -289,8 +373,8 @@ function deleteBook(index) {
   }
 }
 
-// Form submission - Updated to handle tags
-bookForm.addEventListener("submit", function(e) {
+// Form submission handler
+function handleFormSubmit(e) {
   e.preventDefault();
   
   // Get form elements
@@ -321,66 +405,3 @@ bookForm.addEventListener("submit", function(e) {
     author,
     series: seriesInput.value.trim(),
     bookNumber: bookNumberInput.value.trim(),
-    genre: genreInput.value.trim(),
-    tags: parseTags(tagsInput.value),
-    pages: pagesInput.value.trim(),
-    status: statusInput.value,
-    rating: parseInt(ratingInput.value) || 0,
-    notes: notesInput.value.trim(),
-    cover: coverURLInput.value.trim(),
-    dateAdded: editingIndex !== null ? books[editingIndex].dateAdded : new Date().toISOString()
-  };
-
-  if (editingIndex !== null) {
-    books[editingIndex] = book;
-    editingIndex = null;
-  } else {
-    books.push(book);
-  }
-
-  saveBooks();
-  bookForm.reset();
-  bookForm.classList.add("hidden");
-  coverPreview.classList.add("hidden");
-  renderBooks();
-  
-  // Show success message
-  alert(editingIndex !== null ? "Book updated successfully!" : "Book added successfully!");
-});
-
-// Show form button
-showFormBtn.addEventListener("click", () => {
-  bookForm.classList.toggle("hidden");
-  if (!bookForm.classList.contains("hidden")) {
-    document.getElementById("title").focus();
-  }
-});
-
-// Cancel edit button
-cancelEditBtn.addEventListener("click", () => {
-  bookForm.reset();
-  editingIndex = null;
-  bookForm.classList.add("hidden");
-  coverPreview.classList.add("hidden");
-});
-
-// Cover URL preview
-coverURL.addEventListener("input", () => {
-  const url = coverURL.value.trim();
-  if (url) {
-    coverPreview.src = url;
-    coverPreview.classList.remove("hidden");
-  } else {
-    coverPreview.classList.add("hidden");
-  }
-});
-
-// Edit book function - Updated to handle tags
-function editBook(index) {
-  const book = books[index];
-  document.getElementById("title").value = book.title;
-  document.getElementById("author").value = book.author;
-  document.getElementById("series").value = book.series || "";
-  document.getElementById("bookNumber").value = book.bookNumber || "";
-  document.getElementById("genre").value = book.genre || "";
-  document.getElementById("tags").value = book.
