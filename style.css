@@ -96,21 +96,31 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 6px 14px rgba(0,0,0,0.12);
 }
 
+.book {
+  background: var(--card-bg, #fff);
+  padding: 0.5rem;
+  border-radius: 0.4rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  font-size: 0.8rem;
+}
+
 .book h3 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   margin: 0.3rem 0;
+  font-weight: 600;
 }
 
 .book p {
-  font-size: 0.85rem;
-  margin: 0.15rem 0;
+  font-size: 0.75rem;
+  margin: 0.1rem 0;
 }
 
 .book img {
   width: 100%;
-  height: auto;
+  max-height: 160px;
   object-fit: contain;
   border-radius: 0.3rem;
+  margin-bottom: 0.3rem;
 }
 
 .book-actions {
@@ -119,14 +129,22 @@ input:focus, textarea:focus, select:focus {
   justify-content: space-between;
 }
 
-.status-badge {
-  padding: 0.2em 0.6em;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: bold;
-  display: inline-block;
-  margin-top: 0.3em;
+.stars {
+  font-size: 0.8rem;
+  margin-top: 0.2em;
 }
+
+.status-badge {
+  font-size: 0.7rem;
+  padding: 0.2em 0.5em;
+  margin-top: 0.2em;
+}
+
+.progress-bar {
+  height: 6px;
+  margin-top: 4px;
+}
+
 
 .status-To\ Read {
   background-color: #ffcccc;
@@ -141,20 +159,6 @@ input:focus, textarea:focus, select:focus {
 .status-Finished {
   background-color: #d4edda;
   color: #155724;
-}
-
-.stars {
-  color: #f5b50a;
-  font-size: 0.9rem;
-  margin-top: 0.3em;
-}
-
-.progress-bar {
-  background: #ddd;
-  border-radius: 10px;
-  height: 6px;
-  overflow: hidden;
-  margin-top: 4px;
 }
 
 .progress {
