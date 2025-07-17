@@ -20,13 +20,6 @@ function saveBooks() {
   localStorage.setItem("books", JSON.stringify(books));
 }
 
-function clearChip(type) {
-  if (type === "search") searchInput.value = "";
-  if (type === "status") filterSelect.value = "All";
-  if (type === "sort") sortSelect.value = "default";
-  renderBooks();
-}
-
 function renderChips() {
   chipBar.innerHTML = "";
   const chips = [];
@@ -46,18 +39,21 @@ function renderChips() {
   chips.forEach(chip => {
     const div = document.createElement("div");
     div.className = "chip";
-    div.innerHTML = `
-      ${chip.label}
-      <button onclick="clearChip('${chip.id}')">×</button>
-    `;
+    div.innerHTML = `${chip.label} <button onclick="clearChip('${chip.id}')">×</button>`;
     chipBar.appendChild(div);
   });
+}
+
+function clearChip(type) {
+  if (type === "search") searchInput.value = "";
+  if (type === "status") filterSelect.value = "All";
+  if (type === "sort") sortSelect.value = "default";
+  renderBooks();
 }
 
 function renderPagination(total) {
   pagination.innerHTML = "";
   const pages = Math.ceil(total / perPage);
-
   for (let i = 1; i <= pages; i++) {
     const btn = document.createElement("button");
     btn.textContent = i;
@@ -79,50 +75,44 @@ function parsePages(pages) {
 }
 
 function renderBooks() {
-  let filteredBooks = [...books];
+  let filtered = [...books];
 
   const status = filterSelect.value;
-  if (status !== "All") {
-    filteredBooks = filteredBooks.filter(b => b.status === status);
-  }
+  if (status !== "All") filtered = filtered.filter(b => b.status === status);
 
-  const searchTerm = searchInput.value.toLowerCase();
-  if (searchTerm) {
-    filteredBooks = filteredBooks.filter(b =>
-      b.title.toLowerCase().includes(searchTerm) ||
-      b.author.toLowerCase().includes(searchTerm) ||
-      b.series?.toLowerCase().includes(searchTerm) ||
-      b.genre?.toLowerCase().includes(searchTerm)
+  const term = searchInput.value.toLowerCase();
+  if (term) {
+    filtered = filtered.filter(b =>
+      b.title.toLowerCase().includes(term) ||
+      b.author.toLowerCase().includes(term) ||
+      b.series?.toLowerCase().includes(term) ||
+      b.genre?.toLowerCase().includes(term)
     );
   }
 
-  const sortValue = sortSelect.value;
-  if (sortValue !== "default") {
-    filteredBooks.sort((a, b) => {
-      if (sortValue === "rating" || sortValue === "bookNumber") {
-        return (b[sortValue] || 0) - (a[sortValue] || 0);
-      } else if (sortValue === "date") {
+  const sortBy = sortSelect.value;
+  if (sortBy !== "default") {
+    filtered.sort((a, b) => {
+      if (sortBy === "rating" || sortBy === "bookNumber") {
+        return (b[sortBy] || 0) - (a[sortBy] || 0);
+      } else if (sortBy === "date") {
         return new Date(b.dateAdded) - new Date(a.dateAdded);
       } else {
-        return (a[sortValue] || "").localeCompare(b[sortValue] || "");
+        return (a[sortBy] || "").localeCompare(b[sortBy] || "");
       }
     });
   }
 
-  renderPagination(filteredBooks.length);
+  renderPagination(filtered.length);
   const start = (currentPage - 1) * perPage;
-  const pageBooks = filteredBooks.slice(start, start + perPage);
+  const visibleBooks = filtered.slice(start, start + perPage);
 
   bookList.innerHTML = "";
-
   const groups = { "To Read": [], "Reading": [], "Finished": [] };
+  visibleBooks.forEach((b, i) => groups[b.status]?.push({ book: b, index: i }));
 
-  pageBooks.forEach((book, index) => {
-    groups[book.status].push({ book, index });
-  });
-
-  Object.keys(groups).forEach(status => {
-    if (groups[status].length > 0) {
+  for (const status of ["To Read", "Reading", "Finished"]) {
+    if (groups[status].length) {
       const title = document.createElement("div");
       title.className = "group-title";
       title.textContent = status;
@@ -134,7 +124,7 @@ function renderBooks() {
 
         const progress = parsePages(book.pages);
         const stars = "★".repeat(book.rating || 0) + "☆".repeat(5 - (book.rating || 0));
-        const badgeClass = book.status ? `status-${book.status.replace(" ", "\\ ")}` : "";
+        const badgeClass = `status-${book.status.replace(" ", "\\ ")}`;
 
         div.innerHTML = `
           <img src="${book.cover || ''}" alt="${book.title}" />
@@ -146,14 +136,13 @@ function renderBooks() {
           <div class="stars">${stars}</div>
           <span class="status-badge ${badgeClass}">${book.status}</span>
           <div class="book-actions">
-            <button onclick="editBook(${index})">✏️ Edit</button>
-            <button onclick="deleteBook(${index})">🗑️ Delete</button>
-          </div>
-        `;
+            <button onclick="editBook(${books.indexOf(book)})">✏️ Edit</button>
+            <button onclick="deleteBook(${books.indexOf(book)})">🗑️ Delete</button>
+          </div>`;
         bookList.appendChild(div);
       });
     }
-  });
+  }
 
   renderChips();
   renderStatsDashboard();
@@ -162,29 +151,16 @@ function renderBooks() {
 
 function renderStatsDashboard() {
   const ctx = document.getElementById("statsChart").getContext("2d");
-  const statusCounts = { "To Read": 0, "Reading": 0, "Finished": 0 };
-
-  books.forEach(book => {
-    if (statusCounts[book.status] !== undefined) {
-      statusCounts[book.status]++;
-    }
-  });
-
-  if (window.bookChart) {
-    window.bookChart.destroy();
-  }
-
+  const counts = { "To Read": 0, "Reading": 0, "Finished": 0 };
+  books.forEach(b => counts[b.status]++);
+  if (window.bookChart) window.bookChart.destroy();
   window.bookChart = new Chart(ctx, {
     type: "doughnut",
     data: {
       labels: ["To Read", "Reading", "Finished"],
       datasets: [{
         label: "Books by Status",
-        data: [
-          statusCounts["To Read"],
-          statusCounts["Reading"],
-          statusCounts["Finished"]
-        ],
+        data: [counts["To Read"], counts["Reading"], counts["Finished"]],
         backgroundColor: ["#ffcccc", "#fff3cd", "#d4edda"],
         borderColor: "#333",
         borderWidth: 1
@@ -192,29 +168,21 @@ function renderStatsDashboard() {
     },
     options: {
       responsive: true,
-      plugins: {
-        legend: {
-          position: "bottom"
-        }
-      }
+      plugins: { legend: { position: "bottom" } }
     }
   });
 }
 
 function enableDragDrop() {
-  const container = document.getElementById("book-list");
-  Sortable.create(container, {
+  Sortable.create(bookList, {
     animation: 150,
     handle: ".book",
     draggable: ".book",
-    onEnd: evt => {
-      const reordered = Array.from(container.querySelectorAll(".book h3"))
-        .map(h3 => {
-          const title = h3.textContent;
-          return books.find(b => b.title === title);
-        });
-
-      books = reordered;
+    onEnd: () => {
+      const newOrder = Array.from(bookList.querySelectorAll(".book h3")).map(h =>
+        books.find(b => b.title === h.textContent)
+      );
+      books = newOrder;
       saveBooks();
       renderBooks();
     }
@@ -224,8 +192,8 @@ function enableDragDrop() {
 bookForm.addEventListener("submit", e => {
   e.preventDefault();
   const book = {
-    title: bookForm.title.value,
-    author: bookForm.author.value,
+    title: bookForm.title.value.trim(),
+    author: bookForm.author.value.trim(),
     series: bookForm.series.value,
     bookNumber: bookForm.bookNumber.value,
     genre: bookForm.genre.value,
@@ -236,21 +204,44 @@ bookForm.addEventListener("submit", e => {
     cover: bookForm.coverURL.value,
     dateAdded: new Date().toISOString()
   };
+
+  if (!book.title || !book.author) {
+    alert("Title and Author are required.");
+    return;
+  }
+
   if (editingIndex !== null) {
     books[editingIndex] = book;
     editingIndex = null;
   } else {
     books.push(book);
   }
-  bookForm.reset();
-  coverPreview.classList.add("hidden");
-  bookForm.classList.add("hidden"); // Hide form after submit
+
   saveBooks();
+  bookForm.reset();
+  bookForm.classList.add("hidden");
+  coverPreview.classList.add("hidden");
   renderBooks();
 });
 
 showFormBtn.addEventListener("click", () => {
   bookForm.classList.toggle("hidden");
+});
+
+cancelEditBtn.addEventListener("click", () => {
+  bookForm.reset();
+  editingIndex = null;
+  bookForm.classList.add("hidden");
+  coverPreview.classList.add("hidden");
+});
+
+coverURL.addEventListener("input", () => {
+  if (coverURL.value.trim()) {
+    coverPreview.src = coverURL.value;
+    coverPreview.classList.remove("hidden");
+  } else {
+    coverPreview.classList.add("hidden");
+  }
 });
 
 function editBook(index) {
@@ -270,22 +261,6 @@ function editBook(index) {
   editingIndex = index;
   bookForm.classList.remove("hidden");
 }
-
-cancelEditBtn.addEventListener("click", () => {
-  bookForm.reset();
-  editingIndex = null;
-  bookForm.classList.add("hidden");
-  coverPreview.classList.add("hidden");
-});
-
-coverURL.addEventListener("input", () => {
-  if (coverURL.value.trim()) {
-    coverPreview.src = coverURL.value;
-    coverPreview.classList.remove("hidden");
-  } else {
-    coverPreview.classList.add("hidden");
-  }
-});
 
 [sortSelect, filterSelect].forEach(el => el.addEventListener("change", () => {
   currentPage = 1;
