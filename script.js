@@ -223,12 +223,24 @@ function deleteBook(index) {
   }
 }
 
-// Form submission
-bookForm.addEventListener("submit", e => {
+// Form submission - FIXED VERSION
+bookForm.addEventListener("submit", function(e) {
   e.preventDefault();
   
-  const title = bookForm.title.value.trim();
-  const author = bookForm.author.value.trim();
+  // Get form elements more reliably
+  const titleInput = document.getElementById("title");
+  const authorInput = document.getElementById("author");
+  const seriesInput = document.getElementById("series");
+  const bookNumberInput = document.getElementById("bookNumber");
+  const genreInput = document.getElementById("genre");
+  const pagesInput = document.getElementById("pages");
+  const statusInput = document.getElementById("status");
+  const ratingInput = document.getElementById("rating");
+  const notesInput = document.getElementById("notes");
+  const coverURLInput = document.getElementById("cover-url");
+  
+  const title = titleInput.value.trim();
+  const author = authorInput.value.trim();
   
   if (!title || !author) {
     alert("Title and Author are required.");
@@ -240,14 +252,14 @@ bookForm.addEventListener("submit", e => {
   const book = {
     title,
     author,
-    series: bookForm.series.value.trim(),
-    bookNumber: bookForm.bookNumber.value.trim(),
-    genre: bookForm.genre.value.trim(),
-    pages: bookForm.pages.value.trim(),
-    status: bookForm.status.value,
-    rating: parseInt(bookForm.rating.value) || 0,
-    notes: bookForm.notes.value.trim(),
-    cover: bookForm.coverURL.value.trim(),
+    series: seriesInput.value.trim(),
+    bookNumber: bookNumberInput.value.trim(),
+    genre: genreInput.value.trim(),
+    pages: pagesInput.value.trim(),
+    status: statusInput.value,
+    rating: parseInt(ratingInput.value) || 0,
+    notes: notesInput.value.trim(),
+    cover: coverURLInput.value.trim(),
     dateAdded: editingIndex !== null ? books[editingIndex].dateAdded : new Date().toISOString()
   };
 
@@ -263,13 +275,16 @@ bookForm.addEventListener("submit", e => {
   bookForm.classList.add("hidden");
   coverPreview.classList.add("hidden");
   renderBooks();
+  
+  // Show success message
+  alert(editingIndex !== null ? "Book updated successfully!" : "Book added successfully!");
 });
 
 // Show form button
 showFormBtn.addEventListener("click", () => {
   bookForm.classList.toggle("hidden");
   if (!bookForm.classList.contains("hidden")) {
-    bookForm.title.focus();
+    document.getElementById("title").focus();
   }
 });
 
@@ -295,16 +310,16 @@ coverURL.addEventListener("input", () => {
 // Edit book function
 function editBook(index) {
   const book = books[index];
-  bookForm.title.value = book.title;
-  bookForm.author.value = book.author;
-  bookForm.series.value = book.series || "";
-  bookForm.bookNumber.value = book.bookNumber || "";
-  bookForm.genre.value = book.genre || "";
-  bookForm.pages.value = book.pages || "";
-  bookForm.status.value = book.status;
-  bookForm.rating.value = book.rating || "";
-  bookForm.notes.value = book.notes || "";
-  bookForm.coverURL.value = book.cover || "";
+  document.getElementById("title").value = book.title;
+  document.getElementById("author").value = book.author;
+  document.getElementById("series").value = book.series || "";
+  document.getElementById("bookNumber").value = book.bookNumber || "";
+  document.getElementById("genre").value = book.genre || "";
+  document.getElementById("pages").value = book.pages || "";
+  document.getElementById("status").value = book.status;
+  document.getElementById("rating").value = book.rating || "";
+  document.getElementById("notes").value = book.notes || "";
+  document.getElementById("cover-url").value = book.cover || "";
   
   if (book.cover) {
     coverPreview.src = book.cover;
@@ -313,7 +328,7 @@ function editBook(index) {
   
   editingIndex = index;
   bookForm.classList.remove("hidden");
-  bookForm.title.focus();
+  document.getElementById("title").focus();
 }
 
 // Event listeners for filters and search
