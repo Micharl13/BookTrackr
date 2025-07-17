@@ -52,9 +52,9 @@ function renderBooks() {
     div.innerHTML = `
       ${book.cover ? `<img src="${book.cover}" alt="Cover" onerror="this.style.display='none'" />` : ""}
       <h3>${book.title}</h3>
+      <p><strong>Author:</strong> ${book.author}</p>
       <p>${book.series}</p>
       <p>${book.bookNumber}</p>
-      <p><strong>Author:</strong> ${book.author}</p>
       <p><strong>Status:</strong> ${book.status}</p>
       <p><strong>Rating:</strong> ${book.rating || "N/A"}</p>
       <p><strong>Genre:</strong> ${book.genre || "N/A"}</p>
@@ -74,9 +74,9 @@ form.onsubmit = e => {
   e.preventDefault();
   const newBook = {
     title: form.title.value.trim(),
+    author: form.author.value.trim(),
     series: form.series.value.trim(),
     bookNumber: form.bookNumber.value.trim(),
-    author: form.author.value.trim(),
     genre: form.genre.value.trim(),
     pages: form.pages.value.trim(),
     status: form.status.value,
@@ -114,9 +114,9 @@ cancelEditBtn.onclick = () => {
 function editBook(index) {
   const book = books[index];
   form.title.value = book.title;
+  form.author.value = book.author;
   form.series.value = book.series;
   form.bookNumber.value = book.bookNumber;
-  form.author.value = book.author;
   form.genre.value = book.genre;
   form.pages.value = book.pages;
   form.status.value = book.status;
