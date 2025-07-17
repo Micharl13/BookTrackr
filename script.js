@@ -1,6 +1,3 @@
-// Note: This code should be adapted to NOT use localStorage in Claude.ai artifacts
-// Use in-memory storage instead for artifact compatibility
-
 let books = [];
 let editingIndex = null;
 let currentPage = 1;
@@ -22,10 +19,31 @@ const pagination = document.getElementById("pagination-controls");
 const exportBtn = document.getElementById("export-json");
 const importInput = document.getElementById("import-json");
 
+// Load books from localStorage on page load
+function loadBooks() {
+  const saved = localStorage.getItem("books");
+  if (saved) {
+    try {
+      books = JSON.parse(saved);
+      console.log("Books loaded from localStorage:", books);
+    } catch (error) {
+      console.error("Error loading books from localStorage:", error);
+      books = [];
+    }
+  }
+}
+
 function saveBooks() {
-  // For artifact compatibility, remove localStorage usage
-  // localStorage.setItem("books", JSON.stringify(books));
-  console.log("Books saved to memory:", books);
+  localStorage.setItem("books", JSON.stringify(books));
+  console.log("Books saved to localStorage:", books);
+}
+
+// Load theme from localStorage
+function loadTheme() {
+  const savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "dark") {
+    document.body.classList.add("dark");
+  }
 }
 
 function renderChips() {
@@ -370,8 +388,7 @@ searchInput.addEventListener("input", () => {
 // Theme toggle
 themeToggle.addEventListener("click", () => {
   document.body.classList.toggle("dark");
-  // For artifact compatibility, remove localStorage usage
-  // localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+  localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
 });
 
 // Export functionality
@@ -410,10 +427,9 @@ importInput.addEventListener("change", (e) => {
   reader.readAsText(file);
 });
 
-// Initialize theme - For artifact compatibility, remove localStorage usage
-// if (localStorage.getItem("theme") === "dark") {
-//   document.body.classList.add("dark");
-// }
-
 // Initialize app
-renderBooks();
+document.addEventListener("DOMContentLoaded", () => {
+  loadTheme();
+  loadBooks();
+  renderBooks();
+});
