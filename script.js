@@ -8,9 +8,21 @@ const searchInput = document.getElementById("search");
 const sortSelect = document.getElementById("sort");
 const filterSelect = document.getElementById("filter-status");
 const themeBtn = document.getElementById("toggle-theme");
+const preview = document.getElementById("cover-preview");
 
 function saveBooks() {
   localStorage.setItem("books", JSON.stringify(books));
+}
+
+function createProgressBar(pages) {
+  if (!pages || !pages.includes("/")) return "";
+  const [read, total] = pages.split("/").map(Number);
+  if (isNaN(read) || isNaN(total) || total <= 0) return "";
+  const percent = Math.min((read / total) * 100, 100);
+  return `
+    <div class="progress-bar">
+      <div class="progress" style="width:${percent}%;"></div>
+    </div>`;
 }
 
 function renderBooks() {
@@ -27,9 +39,9 @@ function renderBooks() {
   if (sortSelect.value !== "default") {
     filtered.sort((a, b) => {
       if (sortSelect.value === "rating" || sortSelect.value === "date") {
-        return b[sortSelect.value] - a[sortSelect.value];
+        return (b[sortSelect.value] || 0) - (a[sortSelect.value] || 0);
       }
-      return a[sortSelect.value].localeCompare(b[sortSelect.value]);
+      return (a[sortSelect.value] || "").localeCompare(b[sortSelect.value] || "");
     });
   }
 
@@ -38,7 +50,7 @@ function renderBooks() {
     const div = document.createElement("div");
     div.className = "book";
     div.innerHTML = `
-      ${book.cover ? `<img src="${book.cover}" alt="Cover" />` : ""}
+      ${book.cover ? `<img src="${book.cover}" alt="Cover" onerror="this.style.display='none'" />` : ""}
       <h3>${book.title}</h3>
       <p><strong>Author:</strong> ${book.author}</p>
       <p><strong>Status:</strong> ${book.status}</p>
@@ -46,6 +58,7 @@ function renderBooks() {
       <p><strong>Genre:</strong> ${book.genre || "N/A"}</p>
       <p><strong>Pages:</strong> ${book.pages || "N/A"}</p>
       <p><strong>Notes:</strong> ${book.notes || ""}</p>
+      ${createProgressBar(book.pages)}
       <div class="book-actions">
         <button onclick="editBook(${index})">✏️</button>
         <button onclick="deleteBook(${index})">🗑️</button>
@@ -58,16 +71,22 @@ function renderBooks() {
 form.onsubmit = e => {
   e.preventDefault();
   const newBook = {
-    title: form.title.value,
-    author: form.author.value,
-    genre: form.genre.value,
-    pages: form.pages.value,
+    title: form.title.value.trim(),
+    author: form.author.value.trim(),
+    genre: form.genre.value.trim(),
+    pages: form.pages.value.trim(),
     status: form.status.value,
     rating: form.rating.value,
-    notes: form.notes.value,
-    cover: form["cover-url"].value,
+    notes: form.notes.value.trim(),
+    cover: form["cover-url"].value.trim(),
     date: Date.now()
   };
+
+  if (!newBook.title || !newBook.author) {
+    form.classList.add("error");
+    setTimeout(() => form.classList.remove("error"), 500);
+    return;
+  }
 
   if (editingIndex !== null) {
     books[editingIndex] = newBook;
@@ -77,6 +96,7 @@ form.onsubmit = e => {
   }
 
   form.reset();
+  preview.classList.add("hidden");
   saveBooks();
   renderBooks();
 };
@@ -84,6 +104,7 @@ form.onsubmit = e => {
 cancelEditBtn.onclick = () => {
   editingIndex = null;
   form.reset();
+  preview.classList.add("hidden");
 };
 
 function editBook(index) {
@@ -96,12 +117,14 @@ function editBook(index) {
   form.rating.value = book.rating;
   form.notes.value = book.notes;
   form["cover-url"].value = book.cover;
+  preview.src = book.cover;
+  preview.classList.remove("hidden");
   editingIndex = index;
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function deleteBook(index) {
-  if (confirm("Are you sure you want to delete this book?")) {
+  if (confirm("Delete this book?")) {
     books.splice(index, 1);
     saveBooks();
     renderBooks();
@@ -134,6 +157,16 @@ document.getElementById("import-json").onchange = e => {
 themeBtn.onclick = () => {
   document.body.classList.toggle("dark");
 };
+
+form["cover-url"].addEventListener("input", () => {
+  const url = form["cover-url"].value.trim();
+  if (url) {
+    preview.src = url;
+    preview.classList.remove("hidden");
+  } else {
+    preview.classList.add("hidden");
+  }
+});
 
 searchInput.oninput = renderBooks;
 sortSelect.onchange = renderBooks;
