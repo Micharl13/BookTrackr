@@ -32,6 +32,8 @@
       <button id="toggle-theme">🌓</button>
     </div>
 
+    <div id="active-filters" class="chip-bar"></div>
+
     <form id="book-form">
       <input type="text" id="title" placeholder="Book Title" required />
       <input type="text" id="author" placeholder="Author" required />
@@ -57,9 +59,17 @@
       <input type="file" id="import-json" accept=".json" />
     </div>
 
+    <div id="dashboard">
+      <h2>📊 Stats Dashboard</h2>
+      <canvas id="statsChart"></canvas>
+    </div>
+
+    <div id="pagination-controls"></div>
     <div id="book-list"></div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
