@@ -74,58 +74,58 @@ input:focus, textarea:focus, select:focus {
 }
 
 .group-title {
-  margin-top: 2rem;
-  font-size: 1.3rem;
+  margin-top: 1rem;
+  font-size: 1.1rem;
   font-weight: bold;
-  border-bottom: 2px solid #ccc;
-  padding-bottom: 0.3rem;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.2rem;
 }
 
 .book {
   background: var(--card-bg, #fff);
-  padding: 1rem;
-  border-radius: 0.6rem;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  padding: 0.7rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.08);
   position: relative;
   transition: transform 0.2s, box-shadow 0.3s;
+  font-size: 0.9rem;
 }
 
 .book:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
 }
 
 .book h3 {
-  font-size: 1.4rem;
-  margin: 0.5rem 0 0.3rem;
-  font-weight: bold;
+  font-size: 1.1rem;
+  margin: 0.3rem 0;
 }
 
 .book p {
-  font-size: 0.95rem;
-  margin: 0.2rem 0;
+  font-size: 0.85rem;
+  margin: 0.15rem 0;
 }
 
 .book img {
   width: 100%;
-  max-height: 200px;
-  object-fit: cover;
-  border-radius: 0.4rem;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0.3rem;
 }
 
 .book-actions {
-  margin-top: 0.5rem;
+  margin-top: 0.3rem;
   display: flex;
   justify-content: space-between;
 }
 
 .status-badge {
-  padding: 0.3em 0.6em;
+  padding: 0.2em 0.6em;
   border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: bold;
   display: inline-block;
-  margin-top: 0.5em;
+  margin-top: 0.3em;
 }
 
 .status-To\ Read {
@@ -145,16 +145,16 @@ input:focus, textarea:focus, select:focus {
 
 .stars {
   color: #f5b50a;
-  font-size: 1.1rem;
-  margin-top: 0.4em;
+  font-size: 0.9rem;
+  margin-top: 0.3em;
 }
 
 .progress-bar {
   background: #ddd;
   border-radius: 10px;
-  height: 8px;
+  height: 6px;
   overflow: hidden;
-  margin-top: 5px;
+  margin-top: 4px;
 }
 
 .progress {
@@ -195,10 +195,9 @@ body.dark .book img {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
-/* Chip-style filter tags */
 .chip-bar {
   display: flex;
   flex-wrap: wrap;
@@ -235,7 +234,6 @@ body.dark .chip button {
   color: #f88;
 }
 
-/* Pagination */
 #pagination-controls {
   display: flex;
   justify-content: center;
@@ -268,15 +266,14 @@ body.dark #pagination-controls button.active {
   color: white;
 }
 
-/* Dashboard */
 #dashboard {
   margin: 2rem 0;
 }
 
 #dashboard canvas {
   width: 100%;
-  max-width: 600px;
-  height: 300px;
+  max-width: 400px;
+  height: 200px;
   margin: auto;
   display: block;
 }
