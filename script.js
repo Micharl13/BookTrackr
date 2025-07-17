@@ -52,6 +52,8 @@ function renderBooks() {
     div.innerHTML = `
       ${book.cover ? `<img src="${book.cover}" alt="Cover" onerror="this.style.display='none'" />` : ""}
       <h3>${book.title}</h3>
+      <p>${book.series}</p>
+      <p>${book.bookNumber}</p>
       <p><strong>Author:</strong> ${book.author}</p>
       <p><strong>Status:</strong> ${book.status}</p>
       <p><strong>Rating:</strong> ${book.rating || "N/A"}</p>
