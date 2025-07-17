@@ -179,6 +179,27 @@ input:focus, textarea:focus, select:focus {
   transition: width 0.3s;
 }
 
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+}
+
+.tag {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.3rem;
+  font-size: 0.6rem;
+  font-weight: 500;
+}
+
+body.dark .tag {
+  background: #263238;
+  color: #81c784;
+}
+
 button {
   cursor: pointer;
   transition: transform 0.1s ease;
