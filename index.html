@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BookTrackr</title>
   <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
@@ -33,7 +34,7 @@
       <input type="text" id="title" placeholder="Book Title" required />
       <input type="text" id="author" placeholder="Author" required />
       <input type="text" id="genre" placeholder="Genre / Tags" />
-      <input type="number" id="pages" placeholder="Pages Read / Total" />
+      <input type="text" id="pages" placeholder="Pages Read / Total (e.g. 100/300)" />
       <select id="status">
         <option value="To Read">To Read</option>
         <option value="Reading">Reading</option>
@@ -42,6 +43,7 @@
       <input type="number" id="rating" placeholder="Rating (1–5)" min="1" max="5" />
       <textarea id="notes" placeholder="Notes..."></textarea>
       <input type="url" id="cover-url" placeholder="Cover Image URL" />
+      <img id="cover-preview" alt="Preview" class="hidden" />
       <button type="submit">Add / Save Book</button>
       <button type="button" id="cancel-edit">Cancel Edit</button>
     </form>
