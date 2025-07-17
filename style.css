@@ -1,4 +1,85 @@
-/* Existing styles... */
+body {
+  font-family: 'Raleway', sans-serif;
+  margin: 0;
+  padding: 1rem;
+  background: var(--bg, #f0f0f0);
+  color: var(--text, #000);
+  transition: background 0.3s, color 0.3s;
+  background-image: url('https://www.transparenttextures.com/patterns/white-wall-3.png');
+}
+
+body.dark {
+  --bg: #121212;
+  --text: #f5f5f5;
+  --card-bg: #1e1e1e;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+}
+
+h1 {
+  background: linear-gradient(to right, #ff8a00, #e52e71);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+input, select, textarea, button {
+  display: block;
+  margin: 0.5rem 0;
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 0.4rem;
+  border: 1px solid #ccc;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #4caf50;
+  outline: none;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+#book-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+#book-form textarea,
+#book-form button,
+#book-form #cancel-edit,
+#cover-preview {
+  grid-column: span 2;
+}
+
+#book-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.group-title {
+  margin-top: 2rem;
+  font-size: 1.3rem;
+  font-weight: bold;
+  border-bottom: 2px solid #ccc;
+  padding-bottom: 0.3rem;
+}
 
 .book {
   background: var(--card-bg, #fff);
@@ -7,6 +88,35 @@
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   position: relative;
   transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.book:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.book h3 {
+  font-size: 1.4rem;
+  margin: 0.5rem 0 0.3rem;
+  font-weight: bold;
+}
+
+.book p {
+  font-size: 0.95rem;
+  margin: 0.2rem 0;
+}
+
+.book img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 0.4rem;
+}
+
+.book-actions {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: space-between;
 }
 
 .status-badge {
@@ -53,13 +163,120 @@
   transition: width 0.3s;
 }
 
-.book h3 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin: 0.5rem 0 0.3rem;
+button {
+  cursor: pointer;
+  transition: transform 0.1s ease;
 }
 
-.book p strong {
-  font-weight: 600;
-  color: #555;
+button:active {
+  transform: scale(0.97);
+}
+
+#import-json {
+  margin-top: 0.5rem;
+}
+
+.import-export {
+  margin: 1rem 0;
+}
+
+form.error {
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+body.dark .book img {
+  filter: brightness(0.8);
+}
+
+.hidden {
+  display: none;
+}
+
+/* Chip-style filter tags */
+.chip-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.chip {
+  background: #eee;
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.chip button {
+  background: none;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1rem;
+  color: #a00;
+}
+
+body.dark .chip {
+  background: #333;
+  color: #f5f5f5;
+}
+
+body.dark .chip button {
+  color: #f88;
+}
+
+/* Pagination */
+#pagination-controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+#pagination-controls button {
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+#pagination-controls button.active {
+  background: #4caf50;
+  color: white;
+  border-color: #4caf50;
+}
+
+body.dark #pagination-controls button {
+  background: #333;
+  color: #f5f5f5;
+  border-color: #666;
+}
+
+body.dark #pagination-controls button.active {
+  background: #4caf50;
+  color: white;
+}
+
+/* Dashboard */
+#dashboard {
+  margin: 2rem 0;
+}
+
+#dashboard canvas {
+  width: 100%;
+  max-width: 600px;
+  height: 300px;
+  margin: auto;
+  display: block;
 }
