@@ -1,4 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // ✅ Persist dark mode on reload
+  if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark");
+  }
+
   const bookForm = document.getElementById("book-form");
   const showFormBtn = document.getElementById("show-form");
   const cancelEditBtn = document.getElementById("cancel-edit");
@@ -139,10 +144,20 @@ document.addEventListener("DOMContentLoaded", () => {
   function editBook(index) {
     const book = books[index];
     editIndex = index;
-    Object.entries(book).forEach(([key, val]) => {
-      const field = document.getElementById(key);
-      if (field) field.value = val;
+
+    const fields = [
+      "title", "author", "series", "bookNumber", "genre", "tags", "pages",
+      "status", "rating", "notes", "cover-url"
+    ];
+
+    fields.forEach(id => {
+      const input = document.getElementById(id);
+      if (input) {
+        const key = id === "cover-url" ? "coverUrl" : id;
+        input.value = book[key] || "";
+      }
     });
+
     coverPreview.src = book.coverUrl;
     coverPreview.classList.remove("hidden");
     bookForm.classList.remove("hidden");
@@ -163,8 +178,26 @@ document.addEventListener("DOMContentLoaded", () => {
     notesModal.classList.remove("hidden");
   }
 
+  // ✅ Make card functions globally accessible
+  window.editBook = editBook;
+  window.deleteBook = deleteBook;
+  window.showNotes = showNotes;
+
   bookForm.addEventListener("submit", e => {
     e.preventDefault();
+
+    const title = document.getElementById("title");
+    const author = document.getElementById("author");
+    const series = document.getElementById("series");
+    const bookNumber = document.getElementById("bookNumber");
+    const genre = document.getElementById("genre");
+    const tags = document.getElementById("tags");
+    const pages = document.getElementById("pages");
+    const status = document.getElementById("status");
+    const rating = document.getElementById("rating");
+    const notes = document.getElementById("notes");
+    const coverUrl = document.getElementById("cover-url");
+
     const newBook = {
       title: title.value,
       author: author.value,
@@ -196,6 +229,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   cancelEditBtn.addEventListener("click", () => {
     editIndex = null;
+    bookForm.reset();
+    bookForm.classList.add("hidden");
+    coverPreview.classList.add("hidden");
   });
 
   closeNotesModal.addEventListener("click", () => {
@@ -203,7 +239,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   toggleThemeBtn.addEventListener("click", () => {
-    document.body.classList.toggle("dark");
+    const isDark = document.body.classList.toggle("dark");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
   });
 
   exportBtn.addEventListener("click", () => {
@@ -235,6 +272,27 @@ document.addEventListener("DOMContentLoaded", () => {
   searchInput.addEventListener("input", () => {
     currentPage = 1;
     renderBooks();
+  });
+
+  coverUrlInput.addEventListener("input", (e) => {
+    const url = e.target.value;
+    if (url) {
+      coverPreview.src = url;
+      coverPreview.classList.remove("hidden");
+    } else {
+      coverPreview.classList.add("hidden");
+    }
+  });
+
+  coverPreview.onerror = () => {
+    coverPreview.classList.add("hidden");
+  };
+
+  showFormBtn.addEventListener("click", () => {
+    bookForm.reset();
+    editIndex = null;
+    coverPreview.classList.add("hidden");
+    bookForm.classList.remove("hidden");
   });
 
   renderBooks();
