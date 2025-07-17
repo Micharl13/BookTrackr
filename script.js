@@ -74,6 +74,8 @@ form.onsubmit = e => {
   e.preventDefault();
   const newBook = {
     title: form.title.value.trim(),
+    series: form.series.value.trim(),
+    bookNumber: form.bookNumber.value.trim(),
     author: form.author.value.trim(),
     genre: form.genre.value.trim(),
     pages: form.pages.value.trim(),
@@ -112,6 +114,8 @@ cancelEditBtn.onclick = () => {
 function editBook(index) {
   const book = books[index];
   form.title.value = book.title;
+  form.series.value = book.series;
+  form.bookNumber.value = book.bookNumber;
   form.author.value = book.author;
   form.genre.value = book.genre;
   form.pages.value = book.pages;
