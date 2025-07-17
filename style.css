@@ -1,3 +1,9 @@
+:root {
+  --bg: #f0f0f0;
+  --text: #000;
+  --card-bg: #fff;
+}
+
 body {
   font-family: 'Raleway', sans-serif;
   margin: 0;
