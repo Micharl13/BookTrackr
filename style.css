@@ -52,3 +52,14 @@
   background: #4caf50;
   transition: width 0.3s;
 }
+
+.book h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0.5rem 0 0.3rem;
+}
+
+.book p strong {
+  font-weight: 600;
+  color: #555;
+}
