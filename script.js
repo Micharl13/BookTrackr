@@ -4,6 +4,7 @@ let currentPage = 1;
 const perPage = 6;
 
 const bookForm = document.getElementById("book-form");
+const showFormBtn = document.getElementById("show-form");
 const bookList = document.getElementById("book-list");
 const coverURL = document.getElementById("cover-url");
 const coverPreview = document.getElementById("cover-preview");
@@ -243,8 +244,13 @@ bookForm.addEventListener("submit", e => {
   }
   bookForm.reset();
   coverPreview.classList.add("hidden");
+  bookForm.classList.add("hidden"); // Hide form after submit
   saveBooks();
   renderBooks();
+});
+
+showFormBtn.addEventListener("click", () => {
+  bookForm.classList.toggle("hidden");
 });
 
 function editBook(index) {
@@ -262,21 +268,15 @@ function editBook(index) {
   coverPreview.src = book.cover;
   coverPreview.classList.remove("hidden");
   editingIndex = index;
+  bookForm.classList.remove("hidden");
 }
 
 cancelEditBtn.addEventListener("click", () => {
   bookForm.reset();
   editingIndex = null;
+  bookForm.classList.add("hidden");
   coverPreview.classList.add("hidden");
 });
-
-function deleteBook(index) {
-  if (confirm("Sure you want to delete this book?")) {
-    books.splice(index, 1);
-    saveBooks();
-    renderBooks();
-  }
-}
 
 coverURL.addEventListener("input", () => {
   if (coverURL.value.trim()) {
