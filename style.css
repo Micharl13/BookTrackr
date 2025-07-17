@@ -23,6 +23,7 @@ h1 {
   background: linear-gradient(to right, #ff8a00, #e52e71);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
   font-size: 2.5rem;
   text-align: center;
   margin-bottom: 1rem;
@@ -38,6 +39,7 @@ input, select, textarea, button {
   font-family: inherit;
   font-size: 1rem;
   transition: border-color 0.3s;
+  box-sizing: border-box;
 }
 
 input:focus, textarea:focus, select:focus {
@@ -51,6 +53,12 @@ input:focus, textarea:focus, select:focus {
   gap: 0.5rem;
   margin-bottom: 1rem;
   align-items: center;
+}
+
+.controls > * {
+  flex: 1;
+  min-width: 120px;
+  margin: 0;
 }
 
 #book-form {
@@ -79,6 +87,7 @@ input:focus, textarea:focus, select:focus {
   font-weight: bold;
   border-bottom: 1px solid #ccc;
   padding-bottom: 0.2rem;
+  grid-column: 1 / -1;
 }
 
 .book {
@@ -94,14 +103,6 @@ input:focus, textarea:focus, select:focus {
 .book:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 14px rgba(0,0,0,0.12);
-}
-
-.book {
-  background: var(--card-bg, #fff);
-  padding: 0.5rem;
-  border-radius: 0.4rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  font-size: 0.8rem;
 }
 
 .book h3 {
@@ -126,7 +127,14 @@ input:focus, textarea:focus, select:focus {
 .book-actions {
   margin-top: 0.3rem;
   display: flex;
-  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.book-actions button {
+  flex: 1;
+  margin: 0;
+  padding: 0.3rem;
+  font-size: 0.8rem;
 }
 
 .stars {
@@ -138,25 +146,29 @@ input:focus, textarea:focus, select:focus {
   font-size: 0.7rem;
   padding: 0.2em 0.5em;
   margin-top: 0.2em;
+  border-radius: 0.3rem;
+  display: inline-block;
 }
 
 .progress-bar {
   height: 6px;
   margin-top: 4px;
+  background: #eee;
+  border-radius: 3px;
+  overflow: hidden;
 }
 
-
-.status-To\ Read {
+.status-to-read {
   background-color: #ffcccc;
   color: #a00;
 }
 
-.status-Reading {
+.status-reading {
   background-color: #fff3cd;
   color: #856404;
 }
 
-.status-Finished {
+.status-finished {
   background-color: #d4edda;
   color: #155724;
 }
@@ -176,12 +188,17 @@ button:active {
   transform: scale(0.97);
 }
 
-#import-json {
-  margin-top: 0.5rem;
-}
-
 .import-export {
   margin: 1rem 0;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.import-export button,
+.import-export input {
+  flex: 1;
+  min-width: 200px;
 }
 
 form.error {
@@ -227,6 +244,8 @@ body.dark .book img {
   padding: 0;
   font-size: 1rem;
   color: #a00;
+  width: auto;
+  margin: 0;
 }
 
 body.dark .chip {
@@ -251,6 +270,8 @@ body.dark .chip button {
   background: #fff;
   cursor: pointer;
   border-radius: 4px;
+  width: auto;
+  margin: 0;
 }
 
 #pagination-controls button.active {
@@ -280,4 +301,49 @@ body.dark #pagination-controls button.active {
   height: 200px;
   margin: auto;
   display: block;
+}
+
+body.dark input, body.dark select, body.dark textarea {
+  background: #333;
+  color: #f5f5f5;
+  border-color: #666;
+}
+
+body.dark button {
+  background: #333;
+  color: #f5f5f5;
+  border-color: #666;
+}
+
+body.dark button:hover {
+  background: #444;
+}
+
+.no-books {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  margin: 2rem 0;
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+  }
+  
+  #book-form {
+    grid-template-columns: 1fr;
+  }
+  
+  #book-form textarea,
+  #book-form button,
+  #book-form #cancel-edit,
+  #cover-preview {
+    grid-column: span 1;
+  }
+  
+  #book-list {
+    grid-template-columns: 1fr;
+  }
 }
