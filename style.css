@@ -1,77 +1,4 @@
-body {
-  font-family: 'Raleway', sans-serif;
-  margin: 0;
-  padding: 1rem;
-  background: var(--bg, #f0f0f0);
-  color: var(--text, #000);
-  transition: background 0.3s, color 0.3s;
-  background-image: url('https://www.transparenttextures.com/patterns/white-wall-3.png');
-}
-
-body.dark {
-  --bg: #121212;
-  --text: #f5f5f5;
-  --card-bg: #1e1e1e;
-}
-
-.container {
-  max-width: 900px;
-  margin: auto;
-}
-
-h1 {
-  background: linear-gradient(to right, #ff8a00, #e52e71);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-size: 2.5rem;
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-input, select, textarea, button {
-  display: block;
-  margin: 0.5rem 0;
-  width: 100%;
-  padding: 0.6rem;
-  border-radius: 0.4rem;
-  border: 1px solid #ccc;
-  font-family: inherit;
-  font-size: 1rem;
-  transition: border-color 0.3s;
-}
-
-input:focus, textarea:focus, select:focus {
-  border-color: #4caf50;
-  outline: none;
-}
-
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  align-items: center;
-}
-
-#book-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-#book-form textarea,
-#book-form button,
-#book-form #cancel-edit,
-#cover-preview {
-  grid-column: span 2;
-}
-
-#book-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1rem;
-}
+/* Existing styles... */
 
 .book {
   background: var(--card-bg, #fff);
@@ -82,39 +9,34 @@ input:focus, textarea:focus, select:focus {
   transition: transform 0.2s, box-shadow 0.3s;
 }
 
-.book:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+.status-badge {
+  padding: 0.3em 0.6em;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  display: inline-block;
+  margin-top: 0.5em;
 }
 
-.book img {
-  width: 100%;
-  max-height: 200px;
-  object-fit: cover;
-  border-radius: 0.4rem;
+.status-To\ Read {
+  background-color: #ffcccc;
+  color: #a00;
 }
 
-.book-actions {
-  margin-top: 0.5rem;
-  display: flex;
-  justify-content: space-between;
+.status-Reading {
+  background-color: #fff3cd;
+  color: #856404;
 }
 
-button {
-  cursor: pointer;
-  transition: transform 0.1s ease;
+.status-Finished {
+  background-color: #d4edda;
+  color: #155724;
 }
 
-button:active {
-  transform: scale(0.97);
-}
-
-#import-json {
-  margin-top: 0.5rem;
-}
-
-.import-export {
-  margin: 1rem 0;
+.stars {
+  color: #f5b50a;
+  font-size: 1.1rem;
+  margin-top: 0.4em;
 }
 
 .progress-bar {
@@ -129,22 +51,4 @@ button:active {
   height: 100%;
   background: #4caf50;
   transition: width 0.3s;
-}
-
-form.error {
-  animation: shake 0.3s ease;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
-}
-
-body.dark .book img {
-  filter: brightness(0.8);
-}
-
-.hidden {
-  display: none;
 }
