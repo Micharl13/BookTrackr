@@ -1,12 +1,14 @@
+// --- Config ---
+const BOOKS_PER_BATCH = 10;
+
 // --- Global Variables ---
 let bookData = JSON.parse(localStorage.getItem("books")) || [];
 let editingIndex = -1;
 let statsChart = null;
-let fieldVisibility = {
-  series: true,
-  notes: true
-};
 let deleteTargetIndex = -1;
+let filteredBooks = [];
+let renderIndex = 0;
+let observer;
 
 // --- DOM Elements ---
 const form = document.getElementById("book-form");
@@ -17,8 +19,8 @@ const statusFilter = document.getElementById("filter-status");
 const coverPreview = document.getElementById("cover-preview");
 const shelfToggle = document.getElementById("toggle-view");
 const themeToggle = document.getElementById("toggle-theme");
-const customizeBtn = document.getElementById("toggle-fields");
 const autocompleteBox = document.getElementById("autocomplete-suggestions");
+const scrollTrigger = document.getElementById("infinite-scroll-trigger");
 
 // --- Utility Functions ---
 function saveBooks() {
@@ -32,9 +34,9 @@ function clearForm() {
 }
 
 function validateForm() {
-  const rating = parseInt(document.getElementById("rating").value);
-  const pagesRead = parseInt(document.getElementById("pages-read").value);
-  const totalPages = parseInt(document.getElementById("pages-total").value);
+  const rating = parseInt(form.rating.value);
+  const pagesRead = parseInt(form["pages-read"].value);
+  const totalPages = parseInt(form["pages-total"].value);
   if (rating && (rating < 1 || rating > 5)) {
     alert("Rating must be between 1 and 5");
     return false;
@@ -51,46 +53,70 @@ function updateProgressBar(book) {
   return `<div class="progress-bar"><div class="progress" style="width: ${progress}%"></div></div>`;
 }
 
-function renderBooks() {
-  list.innerHTML = "";
+function applyFilters() {
   const query = searchInput.value.toLowerCase();
   const filterStatus = statusFilter.value;
-
-  bookData
-    .filter(b => {
+  filteredBooks = bookData
+    .filter(book => {
       const matchesSearch =
-        b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query);
-      const matchesStatus = filterStatus === "All" || b.status === filterStatus;
+        book.title.toLowerCase().includes(query) || book.author.toLowerCase().includes(query);
+      const matchesStatus = filterStatus === "All" || book.status === filterStatus;
       return matchesSearch && matchesStatus;
-    })
-    .forEach((book, i) => {
-      const bookEl = document.createElement("div");
-      bookEl.className = "book";
-
-      const cover = book.cover || "https://via.placeholder.com/150x200?text=No+Cover";
-
-      bookEl.innerHTML = `
-        <img src="${cover}" alt="${book.title}" />
-        <h3>${book.title}</h3>
-        <p><strong>${book.author}</strong></p>
-        ${book.series ? `<p>📖 ${book.series} #${book.bookNumber || ""}</p>` : ""}
-        <p>⭐ ${book.rating || "N/A"}</p>
-        <p>Status: <span class="status-badge status-${book.status.replace(" ", "-").toLowerCase()}">${book.status}</span></p>
-        <p>${book.pagesRead}/${book.pagesTotal} pages</p>
-        ${updateProgressBar(book)}
-        <div class="tags">${(book.tags || []).map(tag => `<span class="tag">${tag}</span>`).join("")}</div>
-        <div class="book-actions">
-          <button onclick="editBook(${i})">✏️</button>
-          <button onclick="confirmDelete(${i})">🗑️</button>
-          <button onclick="viewNotes(${i})">📝</button>
-        </div>
-      `;
-      list.appendChild(bookEl);
     });
 
+  // Optional: sort here if needed
+  renderIndex = 0;
+  list.innerHTML = "";
+  renderNextBatch();
   updateDashboardStats();
 }
 
+function renderNextBatch() {
+  const batch = filteredBooks.slice(renderIndex, renderIndex + BOOKS_PER_BATCH);
+  batch.forEach((book, i) => {
+    const globalIndex = bookData.indexOf(book);
+    const bookEl = document.createElement("div");
+    bookEl.className = "book";
+
+    const cover = book.cover || "https://via.placeholder.com/150x200?text=No+Cover";
+    bookEl.innerHTML = `
+      <img src="${cover}" alt="${book.title}" />
+      <h3>${book.title}</h3>
+      <p><strong>${book.author}</strong></p>
+      ${book.series ? `<p>📖 ${book.series} #${book.bookNumber || ""}</p>` : ""}
+      <p>⭐ ${book.rating || "N/A"}</p>
+      <p>Status: <span class="status-badge status-${book.status.replace(" ", "-").toLowerCase()}">${book.status}</span></p>
+      <p>${book.pagesRead}/${book.pagesTotal} pages</p>
+      ${updateProgressBar(book)}
+      <div class="tags">${(book.tags || []).map(tag => `<span class="tag">${tag}</span>`).join("")}</div>
+      <div class="book-actions">
+        <button onclick="editBook(${globalIndex})">✏️</button>
+        <button onclick="confirmDelete(${globalIndex})">🗑️</button>
+        <button onclick="viewNotes(${globalIndex})">📝</button>
+      </div>
+    `;
+    list.appendChild(bookEl);
+  });
+
+  renderIndex += BOOKS_PER_BATCH;
+
+  if (renderIndex >= filteredBooks.length && observer) {
+    observer.disconnect();
+  }
+}
+
+// --- Infinite Scroll Setup ---
+observer = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) {
+    renderNextBatch();
+  }
+}, {
+  root: null,
+  rootMargin: "0px",
+  threshold: 1.0
+});
+
+// --- Core Actions ---
 function editBook(i) {
   const book = bookData[i];
   editingIndex = i;
@@ -125,7 +151,7 @@ function deleteBook() {
   if (deleteTargetIndex > -1) {
     bookData.splice(deleteTargetIndex, 1);
     saveBooks();
-    renderBooks();
+    applyFilters();
     deleteTargetIndex = -1;
   }
   document.getElementById("delete-confirm-modal").classList.add("hidden");
@@ -176,7 +202,7 @@ function updateDashboardStats() {
   });
 }
 
-// --- Event Listeners ---
+// --- Form Handling ---
 form.addEventListener("submit", e => {
   e.preventDefault();
   if (!validateForm()) return;
@@ -205,7 +231,7 @@ form.addEventListener("submit", e => {
   }
 
   saveBooks();
-  renderBooks();
+  applyFilters();
   clearForm();
   form.classList.add("hidden");
 });
@@ -230,9 +256,9 @@ document.getElementById("cover-url").addEventListener("input", e => {
   }
 });
 
-searchInput.addEventListener("input", renderBooks);
-sortSelect.addEventListener("change", renderBooks);
-statusFilter.addEventListener("change", renderBooks);
+searchInput.addEventListener("input", applyFilters);
+sortSelect.addEventListener("change", applyFilters);
+statusFilter.addEventListener("change", applyFilters);
 shelfToggle.addEventListener("click", () => {
   list.classList.toggle("shelf-view");
 });
@@ -250,9 +276,7 @@ themeToggle.addEventListener("click", () => {
 });
 
 document.getElementById("toggle-fields").addEventListener("click", () => {
-  document.querySelectorAll(".optional-field").forEach(el => {
-    el.classList.toggle("hidden");
-  });
+  document.querySelectorAll(".optional-field").forEach(el => el.classList.toggle("hidden"));
 });
 
 document.getElementById("export-json").addEventListener("click", () => {
@@ -269,11 +293,12 @@ document.getElementById("import-json").addEventListener("change", e => {
   reader.onload = () => {
     bookData = JSON.parse(reader.result);
     saveBooks();
-    renderBooks();
+    applyFilters();
   };
   reader.readAsText(e.target.files[0]);
 });
 
+// --- Autocomplete ---
 ["title", "author"].forEach(id => {
   const input = document.getElementById(id);
   input.addEventListener("input", () => {
@@ -325,12 +350,14 @@ list.addEventListener("click", e => {
   if (e.target.classList.contains("tag")) {
     const tag = e.target.textContent;
     searchInput.value = tag;
-    renderBooks();
+    applyFilters();
   }
 });
 
-// --- Load Theme & Render on Init ---
+// --- Initialize ---
 if (localStorage.getItem("theme") === "dark") {
   document.body.classList.add("dark");
 }
-renderBooks();
+
+applyFilters();
+observer.observe(scrollTrigger);
