@@ -1,315 +1,336 @@
-document.addEventListener("DOMContentLoaded", () => {
-  if (localStorage.getItem("theme") === "dark") {
-    document.body.classList.add("dark");
+// --- Global Variables ---
+let bookData = JSON.parse(localStorage.getItem("books")) || [];
+let editingIndex = -1;
+let statsChart = null;
+let fieldVisibility = {
+  series: true,
+  notes: true
+};
+let deleteTargetIndex = -1;
+
+// --- DOM Elements ---
+const form = document.getElementById("book-form");
+const list = document.getElementById("book-list");
+const searchInput = document.getElementById("search");
+const sortSelect = document.getElementById("sort");
+const statusFilter = document.getElementById("filter-status");
+const coverPreview = document.getElementById("cover-preview");
+const shelfToggle = document.getElementById("toggle-view");
+const themeToggle = document.getElementById("toggle-theme");
+const customizeBtn = document.getElementById("toggle-fields");
+const autocompleteBox = document.getElementById("autocomplete-suggestions");
+
+// --- Utility Functions ---
+function saveBooks() {
+  localStorage.setItem("books", JSON.stringify(bookData));
+}
+
+function clearForm() {
+  form.reset();
+  editingIndex = -1;
+  coverPreview.classList.add("hidden");
+}
+
+function validateForm() {
+  const rating = parseInt(document.getElementById("rating").value);
+  const pagesRead = parseInt(document.getElementById("pages-read").value);
+  const totalPages = parseInt(document.getElementById("pages-total").value);
+  if (rating && (rating < 1 || rating > 5)) {
+    alert("Rating must be between 1 and 5");
+    return false;
   }
-
-  const bookForm = document.getElementById("book-form");
-  const showFormBtn = document.getElementById("show-form");
-  const cancelEditBtn = document.getElementById("cancel-edit");
-  const bookList = document.getElementById("book-list");
-  const sortSelect = document.getElementById("sort");
-  const filterStatus = document.getElementById("filter-status");
-  const searchInput = document.getElementById("search");
-  const coverUrlInput = document.getElementById("cover-url");
-  const coverPreview = document.getElementById("cover-preview");
-  const toggleThemeBtn = document.getElementById("toggle-theme");
-  const exportBtn = document.getElementById("export-json");
-  const importInput = document.getElementById("import-json");
-  const notesModal = document.getElementById("notes-modal");
-  const closeNotesModal = document.getElementById("close-notes-modal");
-  const modalBookTitle = document.getElementById("modal-book-title");
-  const modalNotesContent = document.getElementById("modal-notes-content");
-  const pagination = document.getElementById("pagination-controls");
-
-  let books = JSON.parse(localStorage.getItem("books") || "[]");
-  let editIndex = null;
-  let currentPage = 1;
-  const itemsPerPage = 6;
-
-  function saveBooks() {
-    localStorage.setItem("books", JSON.stringify(books));
+  if (pagesRead < 0 || pagesRead > totalPages) {
+    alert("Pages read must be between 0 and total pages");
+    return false;
   }
+  return true;
+}
 
-  function renderBooks() {
-    const sortBy = sortSelect.value;
-    const status = filterStatus.value;
-    const search = searchInput.value.toLowerCase();
+function updateProgressBar(book) {
+  const progress = book.pagesTotal > 0 ? (book.pagesRead / book.pagesTotal) * 100 : 0;
+  return `<div class="progress-bar"><div class="progress" style="width: ${progress}%"></div></div>`;
+}
 
-    let filtered = books.filter(book => {
-      const matchesStatus = status === "All" || book.status === status;
+function renderBooks() {
+  list.innerHTML = "";
+  const query = searchInput.value.toLowerCase();
+  const filterStatus = statusFilter.value;
+
+  bookData
+    .filter(b => {
       const matchesSearch =
-        book.title.toLowerCase().includes(search) ||
-        book.author.toLowerCase().includes(search) ||
-        book.genre?.toLowerCase().includes(search) ||
-        book.tags?.toLowerCase().includes(search);
-      return matchesStatus && matchesSearch;
+        b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query);
+      const matchesStatus = filterStatus === "All" || b.status === filterStatus;
+      return matchesSearch && matchesStatus;
+    })
+    .forEach((book, i) => {
+      const bookEl = document.createElement("div");
+      bookEl.className = "book";
+
+      const cover = book.cover || "https://via.placeholder.com/150x200?text=No+Cover";
+
+      bookEl.innerHTML = `
+        <img src="${cover}" alt="${book.title}" />
+        <h3>${book.title}</h3>
+        <p><strong>${book.author}</strong></p>
+        ${book.series ? `<p>📖 ${book.series} #${book.bookNumber || ""}</p>` : ""}
+        <p>⭐ ${book.rating || "N/A"}</p>
+        <p>Status: <span class="status-badge status-${book.status.replace(" ", "-").toLowerCase()}">${book.status}</span></p>
+        <p>${book.pagesRead}/${book.pagesTotal} pages</p>
+        ${updateProgressBar(book)}
+        <div class="tags">${(book.tags || []).map(tag => `<span class="tag">${tag}</span>`).join("")}</div>
+        <div class="book-actions">
+          <button onclick="editBook(${i})">✏️</button>
+          <button onclick="confirmDelete(${i})">🗑️</button>
+          <button onclick="viewNotes(${i})">📝</button>
+        </div>
+      `;
+      list.appendChild(bookEl);
     });
 
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "title":
-        case "author":
-        case "series":
-        case "genre":
-          return (a[sortBy] || "").localeCompare(b[sortBy] || "");
-        case "tags":
-          return (a.tags?.split(",")[0] || "").localeCompare(b.tags?.split(",")[0] || "");
-        case "bookNumber":
-        case "rating":
-          return Number(a[sortBy] || 0) - Number(b[sortBy] || 0);
-        case "status":
-          return (a.status || "").localeCompare(b.status || "");
-        case "date":
-          return new Date(a.dateAdded || 0) - new Date(b.dateAdded || 0);
-        default:
-          return 0;
-      }
-    });
+  updateDashboardStats();
+}
 
-    const totalPages = Math.ceil(filtered.length / itemsPerPage);
-    if (currentPage > totalPages) currentPage = 1;
-
-    const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    const pageItems = filtered.slice(start, end);
-
-    bookList.innerHTML = "";
-    if (pageItems.length === 0) {
-      bookList.innerHTML = `<p class="no-books">No books to show.</p>`;
-    } else {
-      pageItems.forEach((book, index) => {
-        const div = document.createElement("div");
-        div.className = "book";
-        div.innerHTML = `
-          <img src="${book.coverUrl || ''}" alt="Cover" onerror="this.style.display='none'">
-          <h3>${book.title}</h3>
-          <p><strong>Author:</strong> ${book.author}</p>
-          <p><strong>Genre:</strong> ${book.genre || ''}</p>
-          <p><strong>Tags:</strong> ${book.tags || ''}</p>
-          <p><strong>Status:</strong> ${book.status}</p>
-          <div class="book-actions">
-            <button onclick="editBook(${books.indexOf(book)})">✏️</button>
-            <button onclick="deleteBook(${books.indexOf(book)})">🗑️</button>
-            <button onclick="showNotes(${books.indexOf(book)})">📝</button>
-          </div>
-        `;
-        bookList.appendChild(div);
-      });
-    }
-
-    pagination.innerHTML = "";
-    for (let i = 1; i <= totalPages; i++) {
-      const btn = document.createElement("button");
-      btn.textContent = i;
-      if (i === currentPage) btn.classList.add("active");
-      btn.addEventListener("click", () => {
-        currentPage = i;
-        renderBooks();
-      });
-      pagination.appendChild(btn);
-    }
-
-    renderChart();
-  }
-
-  function renderChart() {
-    const ctx = document.getElementById("statsChart").getContext("2d");
-    const counts = {
-      "To Read": 0,
-      "Reading": 0,
-      "Finished": 0
-    };
-
-    books.forEach(book => {
-      if (counts.hasOwnProperty(book.status)) {
-        counts[book.status]++;
-      }
-    });
-
-    if (window.statsChart) {
-      window.statsChart.destroy();
-    }
-
-    const hasData = Object.values(counts).some(count => count > 0);
-    if (!hasData) return;
-
-    window.statsChart = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: Object.keys(counts),
-        datasets: [{
-          label: "Books by Status",
-          data: Object.values(counts),
-          backgroundColor: ["#ffcccc", "#fff3cd", "#d4edda"]
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: false }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            precision: 0
-          }
-        }
-      }
-    });
-  }
-
-  function editBook(index) {
-    const book = books[index];
-    editIndex = index;
-
-    const fields = [
-      "title", "author", "series", "bookNumber", "genre", "tags", "pages",
-      "status", "rating", "notes", "cover-url"
-    ];
-
-    fields.forEach(id => {
-      const input = document.getElementById(id);
-      if (input) {
-        const key = id === "cover-url" ? "coverUrl" : id;
-        input.value = book[key] || "";
-      }
-    });
-
-    coverPreview.src = book.coverUrl;
+function editBook(i) {
+  const book = bookData[i];
+  editingIndex = i;
+  form.title.value = book.title;
+  form.author.value = book.author;
+  form.series.value = book.series || "";
+  form.bookNumber.value = book.bookNumber || "";
+  form.genre.value = book.genre || "";
+  form.tags.value = (book.tags || []).join(", ");
+  form["pages-read"].value = book.pagesRead;
+  form["pages-total"].value = book.pagesTotal;
+  form["progress-slider"].value = Math.round((book.pagesRead / book.pagesTotal) * 100);
+  form.status.value = book.status;
+  form.rating.value = book.rating || "";
+  form.notes.value = book.notes || "";
+  form["start-date"].value = book.startDate || "";
+  form["finish-date"].value = book.finishDate || "";
+  form["cover-url"].value = book.cover || "";
+  if (book.cover) {
+    coverPreview.src = book.cover;
     coverPreview.classList.remove("hidden");
-    bookForm.classList.remove("hidden");
   }
+  form.classList.remove("hidden");
+}
 
-  function deleteBook(index) {
-    if (confirm("Delete this book?")) {
-      books.splice(index, 1);
-      saveBooks();
-      renderBooks();
-    }
-  }
+function confirmDelete(index) {
+  deleteTargetIndex = index;
+  document.getElementById("delete-confirm-modal").classList.remove("hidden");
+}
 
-  function showNotes(index) {
-    const book = books[index];
-    modalBookTitle.textContent = `Notes – ${book.title}`;
-    modalNotesContent.textContent = book.notes || "No notes.";
-    notesModal.classList.remove("hidden");
-  }
-
-  window.editBook = editBook;
-  window.deleteBook = deleteBook;
-  window.showNotes = showNotes;
-
-  bookForm.addEventListener("submit", e => {
-    e.preventDefault();
-
-    const title = document.getElementById("title");
-    const author = document.getElementById("author");
-    const series = document.getElementById("series");
-    const bookNumber = document.getElementById("bookNumber");
-    const genre = document.getElementById("genre");
-    const tags = document.getElementById("tags");
-    const pages = document.getElementById("pages");
-    const status = document.getElementById("status");
-    const rating = document.getElementById("rating");
-    const notes = document.getElementById("notes");
-    const coverUrl = document.getElementById("cover-url");
-
-    const newBook = {
-      title: title.value,
-      author: author.value,
-      series: series.value,
-      bookNumber: bookNumber.value,
-      genre: genre.value,
-      tags: tags.value,
-      pages: pages.value,
-      status: status.value,
-      rating: rating.value,
-      notes: notes.value,
-      coverUrl: coverUrl.value,
-      dateAdded: editIndex !== null ? books[editIndex].dateAdded : new Date().toISOString()
-    };
-
-    if (editIndex !== null) {
-      books[editIndex] = newBook;
-      editIndex = null;
-    } else {
-      books.push(newBook);
-    }
-
+function deleteBook() {
+  if (deleteTargetIndex > -1) {
+    bookData.splice(deleteTargetIndex, 1);
     saveBooks();
-    bookForm.reset();
-    coverPreview.classList.add("hidden");
-    bookForm.classList.add("hidden");
     renderBooks();
+    deleteTargetIndex = -1;
+  }
+  document.getElementById("delete-confirm-modal").classList.add("hidden");
+}
+
+function cancelDelete() {
+  deleteTargetIndex = -1;
+  document.getElementById("delete-confirm-modal").classList.add("hidden");
+}
+
+function viewNotes(i) {
+  const book = bookData[i];
+  document.getElementById("modal-book-title").textContent = book.title;
+  document.getElementById("modal-notes-content").textContent = book.notes || "No notes yet.";
+  document.getElementById("notes-modal").classList.remove("hidden");
+}
+
+function updateDashboardStats() {
+  const genres = {};
+  const ratings = [0, 0, 0, 0, 0];
+
+  bookData.forEach(b => {
+    if (b.genre) genres[b.genre] = (genres[b.genre] || 0) + 1;
+    if (b.rating >= 1 && b.rating <= 5) ratings[b.rating - 1]++;
   });
 
-  cancelEditBtn.addEventListener("click", () => {
-    editIndex = null;
-    bookForm.reset();
-    bookForm.classList.add("hidden");
-    coverPreview.classList.add("hidden");
-  });
+  if (statsChart) statsChart.destroy();
 
-  closeNotesModal.addEventListener("click", () => {
-    notesModal.classList.add("hidden");
-  });
-
-  toggleThemeBtn.addEventListener("click", () => {
-    const isDark = document.body.classList.toggle("dark");
-    localStorage.setItem("theme", isDark ? "dark" : "light");
-  });
-
-  exportBtn.addEventListener("click", () => {
-    const blob = new Blob([JSON.stringify(books, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "books.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  importInput.addEventListener("change", e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        books = JSON.parse(reader.result);
-        saveBooks();
-        renderBooks();
-      } catch (err) {
-        alert("Invalid JSON file.");
+  statsChart = new Chart(document.getElementById("statsChart"), {
+    type: "bar",
+    data: {
+      labels: ["1★", "2★", "3★", "4★", "5★"],
+      datasets: [{
+        label: "Ratings",
+        data: ratings,
+        backgroundColor: "#4caf50"
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true }
       }
-    };
-    reader.readAsText(file);
-  });
-
-  searchInput.addEventListener("input", () => {
-    currentPage = 1;
-    renderBooks();
-  });
-
-  coverUrlInput.addEventListener("input", (e) => {
-    const url = e.target.value;
-    if (url) {
-      coverPreview.src = url;
-      coverPreview.classList.remove("hidden");
-    } else {
-      coverPreview.classList.add("hidden");
     }
   });
+}
 
-  coverPreview.onerror = () => {
-    coverPreview.classList.add("hidden");
+// --- Event Listeners ---
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  if (!validateForm()) return;
+
+  const book = {
+    title: form.title.value.trim(),
+    author: form.author.value.trim(),
+    series: form.series.value.trim(),
+    bookNumber: form.bookNumber.value.trim(),
+    genre: form.genre.value.trim(),
+    tags: form.tags.value.split(",").map(t => t.trim()).filter(Boolean),
+    pagesRead: +form["pages-read"].value,
+    pagesTotal: +form["pages-total"].value,
+    status: form.status.value,
+    rating: +form.rating.value || null,
+    notes: form.notes.value.trim(),
+    startDate: form["start-date"].value,
+    finishDate: form["finish-date"].value,
+    cover: form["cover-url"].value.trim()
   };
 
-  showFormBtn.addEventListener("click", () => {
-    bookForm.reset();
-    editIndex = null;
-    coverPreview.classList.add("hidden");
-    bookForm.classList.remove("hidden");
-  });
+  if (editingIndex > -1) {
+    bookData[editingIndex] = book;
+  } else {
+    bookData.push(book);
+  }
 
+  saveBooks();
   renderBooks();
+  clearForm();
+  form.classList.add("hidden");
 });
+
+document.getElementById("show-form").addEventListener("click", () => {
+  clearForm();
+  form.classList.toggle("hidden");
+});
+
+document.getElementById("cancel-edit").addEventListener("click", () => {
+  clearForm();
+  form.classList.add("hidden");
+});
+
+document.getElementById("cover-url").addEventListener("input", e => {
+  const url = e.target.value.trim();
+  if (url) {
+    coverPreview.src = url;
+    coverPreview.classList.remove("hidden");
+  } else {
+    coverPreview.classList.add("hidden");
+  }
+});
+
+searchInput.addEventListener("input", renderBooks);
+sortSelect.addEventListener("change", renderBooks);
+statusFilter.addEventListener("change", renderBooks);
+shelfToggle.addEventListener("click", () => {
+  list.classList.toggle("shelf-view");
+});
+
+document.getElementById("close-notes-modal").addEventListener("click", () => {
+  document.getElementById("notes-modal").classList.add("hidden");
+});
+
+document.getElementById("confirm-delete").addEventListener("click", deleteBook);
+document.getElementById("cancel-delete").addEventListener("click", cancelDelete);
+
+themeToggle.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+});
+
+document.getElementById("toggle-fields").addEventListener("click", () => {
+  document.querySelectorAll(".optional-field").forEach(el => {
+    el.classList.toggle("hidden");
+  });
+});
+
+document.getElementById("export-json").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(bookData)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "books.json";
+  a.click();
+});
+
+document.getElementById("import-json").addEventListener("change", e => {
+  const reader = new FileReader();
+  reader.onload = () => {
+    bookData = JSON.parse(reader.result);
+    saveBooks();
+    renderBooks();
+  };
+  reader.readAsText(e.target.files[0]);
+});
+
+["title", "author"].forEach(id => {
+  const input = document.getElementById(id);
+  input.addEventListener("input", () => {
+    const val = input.value.toLowerCase();
+    const matches = [...new Set(bookData.map(b => b[id]).filter(a => a.toLowerCase().startsWith(val)))].slice(0, 5);
+    if (matches.length > 0 && val) {
+      autocompleteBox.innerHTML = matches.map(m => `<div>${m}</div>`).join("");
+      const rect = input.getBoundingClientRect();
+      autocompleteBox.style.top = `${rect.bottom + window.scrollY}px`;
+      autocompleteBox.style.left = `${rect.left + window.scrollX}px`;
+      autocompleteBox.classList.remove("hidden");
+      autocompleteBox.querySelectorAll("div").forEach(el => {
+        el.addEventListener("click", () => {
+          input.value = el.textContent;
+          autocompleteBox.classList.add("hidden");
+        });
+      });
+    } else {
+      autocompleteBox.classList.add("hidden");
+    }
+  });
+});
+
+document.addEventListener("click", e => {
+  if (!autocompleteBox.contains(e.target)) {
+    autocompleteBox.classList.add("hidden");
+  }
+});
+
+document.getElementById("progress-slider").addEventListener("input", e => {
+  const total = +form["pages-total"].value || 1;
+  const percent = +e.target.value;
+  form["pages-read"].value = Math.round((percent / 100) * total);
+});
+
+document.getElementById("pages-total").addEventListener("input", () => {
+  const total = +form["pages-total"].value || 1;
+  const read = +form["pages-read"].value || 0;
+  form["progress-slider"].value = Math.min(100, Math.round((read / total) * 100));
+});
+
+document.getElementById("pages-read").addEventListener("input", () => {
+  const total = +form["pages-total"].value || 1;
+  const read = +form["pages-read"].value || 0;
+  form["progress-slider"].value = Math.min(100, Math.round((read / total) * 100));
+});
+
+list.addEventListener("click", e => {
+  if (e.target.classList.contains("tag")) {
+    const tag = e.target.textContent;
+    searchInput.value = tag;
+    renderBooks();
+  }
+});
+
+// --- Load Theme & Render on Init ---
+if (localStorage.getItem("theme") === "dark") {
+  document.body.classList.add("dark");
+}
+renderBooks();
