@@ -2,14 +2,16 @@
   --bg: #f0f0f0;
   --text: #000;
   --card-bg: #fff;
+  --accent: #4caf50;
+  --danger: #c0392b;
 }
 
 body {
   font-family: 'Raleway', sans-serif;
   margin: 0;
   padding: 1rem;
-  background: var(--bg, #f0f0f0);
-  color: var(--text, #000);
+  background: var(--bg);
+  color: var(--text);
   transition: background 0.3s, color 0.3s;
   background-image: url('https://www.transparenttextures.com/patterns/white-wall-3.png');
 }
@@ -49,7 +51,7 @@ input, select, textarea, button {
 }
 
 input:focus, textarea:focus, select:focus {
-  border-color: #4caf50;
+  border-color: var(--accent);
   outline: none;
 }
 
@@ -77,27 +79,41 @@ input:focus, textarea:focus, select:focus {
 #book-form textarea,
 #book-form button,
 #book-form #cancel-edit,
-#cover-preview {
+#book-form #cover-preview,
+#book-form label,
+#book-form input[type="range"] {
   grid-column: span 2;
 }
 
-#book-list {
+.optional-field.hidden {
+  display: none;
+}
+
+#book-list.book-list-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1rem;
 }
 
-.group-title {
-  margin-top: 1rem;
-  font-size: 1.1rem;
-  font-weight: bold;
-  border-bottom: 1px solid #ccc;
-  padding-bottom: 0.2rem;
-  grid-column: 1 / -1;
+#book-list.shelf-view .book {
+  font-size: 0;
+  padding: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+#book-list.shelf-view .book img {
+  width: 100%;
+  height: auto;
+  max-height: 260px;
+  border-radius: 0.5rem;
+  margin: 0;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
 .book {
-  background: var(--card-bg, #fff);
+  background: var(--card-bg);
   padding: 0.7rem;
   border-radius: 0.5rem;
   box-shadow: 0 1px 5px rgba(0,0,0,0.08);
@@ -143,11 +159,6 @@ input:focus, textarea:focus, select:focus {
   font-size: 0.7rem;
 }
 
-.stars {
-  font-size: 0.8rem;
-  margin-top: 0.2em;
-}
-
 .status-badge {
   font-size: 0.7rem;
   padding: 0.2em 0.5em;
@@ -162,6 +173,12 @@ input:focus, textarea:focus, select:focus {
   background: #eee;
   border-radius: 3px;
   overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s;
 }
 
 .status-to-read {
@@ -179,12 +196,6 @@ input:focus, textarea:focus, select:focus {
   color: #155724;
 }
 
-.progress {
-  height: 100%;
-  background: #4caf50;
-  transition: width 0.3s;
-}
-
 .tags {
   display: flex;
   flex-wrap: wrap;
@@ -199,6 +210,11 @@ input:focus, textarea:focus, select:focus {
   border-radius: 0.3rem;
   font-size: 0.6rem;
   font-weight: 500;
+  cursor: pointer;
+}
+
+.tag:hover {
+  background: #bbdefb;
 }
 
 body.dark .tag {
@@ -226,20 +242,6 @@ button:active {
 .import-export input {
   flex: 1;
   min-width: 200px;
-}
-
-form.error {
-  animation: shake 0.3s ease;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
-}
-
-body.dark .book img {
-  filter: brightness(0.8);
 }
 
 .hidden {
@@ -270,18 +272,9 @@ body.dark .book img {
   cursor: pointer;
   padding: 0;
   font-size: 1rem;
-  color: #a00;
+  color: var(--danger);
   width: auto;
   margin: 0;
-}
-
-body.dark .chip {
-  background: #333;
-  color: #f5f5f5;
-}
-
-body.dark .chip button {
-  color: #f88;
 }
 
 #pagination-controls {
@@ -302,32 +295,9 @@ body.dark .chip button {
 }
 
 #pagination-controls button.active {
-  background: #4caf50;
+  background: var(--accent);
   color: white;
-  border-color: #4caf50;
-}
-
-body.dark #pagination-controls button {
-  background: #333;
-  color: #f5f5f5;
-  border-color: #666;
-}
-
-body.dark #pagination-controls button.active {
-  background: #4caf50;
-  color: white;
-}
-
-#dashboard {
-  margin: 2rem 0;
-}
-
-#dashboard canvas {
-  width: 100%;
-  max-width: 400px;
-  height: 200px;
-  margin: auto;
-  display: block;
+  border-color: var(--accent);
 }
 
 body.dark input, body.dark select, body.dark textarea {
@@ -346,22 +316,22 @@ body.dark button:hover {
   background: #444;
 }
 
-.no-books {
-  text-align: center;
-  color: #666;
-  font-style: italic;
-  margin: 2rem 0;
-  grid-column: 1 / -1;
+body.dark .chip {
+  background: #333;
+  color: #f5f5f5;
 }
 
-/* Modal Styles */
+body.dark .chip button {
+  color: #f88;
+}
+
 .modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0,0,0,0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -369,26 +339,25 @@ body.dark button:hover {
 }
 
 .modal-content {
-  background: var(--card-bg, #fff);
+  background: var(--card-bg);
   border-radius: 0.5rem;
   max-width: 500px;
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  padding: 1rem;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  border-bottom: 1px solid var(--border, #eee);
 }
 
 .modal-header h3 {
   margin: 0;
-  color: var(--text, #000);
+  color: var(--text);
 }
 
 .close-modal {
@@ -396,7 +365,7 @@ body.dark button:hover {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: var(--text, #000);
+  color: var(--text);
   padding: 0;
   width: auto;
   margin: 0;
@@ -407,51 +376,65 @@ body.dark button:hover {
 }
 
 .modal-body {
-  padding: 1rem;
+  padding: 1rem 0;
 }
 
-#modal-notes-content {
-  white-space: pre-wrap;
-  line-height: 1.6;
-  color: var(--text, #000);
-  font-size: 0.9rem;
+#dashboard {
+  margin: 2rem 0;
 }
 
-.no-notes {
-  color: #666;
-  font-style: italic;
-  text-align: center;
-  padding: 2rem;
+#dashboard canvas {
+  width: 100%;
+  max-width: 400px;
+  height: 200px;
+  margin: auto;
+  display: block;
 }
 
-body.dark .modal-content {
-  background: var(--card-bg, #1e1e1e);
+.autocomplete {
+  position: absolute;
+  background: #fff;
+  border: 1px solid #ccc;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 999;
+  padding: 0.5rem;
+  border-radius: 0.3rem;
 }
 
-body.dark .modal-header {
-  border-bottom-color: #333;
+.autocomplete div {
+  padding: 0.3rem;
+  cursor: pointer;
 }
 
-body.dark .close-modal {
+.autocomplete div:hover {
+  background: #eee;
+}
+
+body.dark .autocomplete {
+  background: #333;
   color: #f5f5f5;
+  border-color: #666;
 }
 
 @media (max-width: 768px) {
   .controls {
     flex-direction: column;
   }
-  
+
   #book-form {
     grid-template-columns: 1fr;
   }
-  
+
   #book-form textarea,
   #book-form button,
   #book-form #cancel-edit,
-  #cover-preview {
+  #cover-preview,
+  #book-form label,
+  #book-form input[type="range"] {
     grid-column: span 1;
   }
-  
+
   #book-list {
     grid-template-columns: 1fr;
   }
@@ -459,10 +442,6 @@ body.dark .close-modal {
   .book-actions {
     flex-direction: column;
     gap: 0.3rem;
-  }
-
-  .book-actions button {
-    font-size: 0.8rem;
   }
 
   .modal-content {
