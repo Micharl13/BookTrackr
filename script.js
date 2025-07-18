@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // ✅ Persist dark mode on reload
   if (localStorage.getItem("theme") === "dark") {
     document.body.classList.add("dark");
   }
@@ -117,17 +116,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const ctx = document.getElementById("statsChart").getContext("2d");
     const counts = {
       "To Read": 0,
-      Reading: 0,
-      Finished: 0
+      "Reading": 0,
+      "Finished": 0
     };
-    books.forEach(b => counts[b.status]++);
-    if (window.statsChart) window.statsChart.destroy();
+
+    books.forEach(book => {
+      if (counts.hasOwnProperty(book.status)) {
+        counts[book.status]++;
+      }
+    });
+
+    if (window.statsChart) {
+      window.statsChart.destroy();
+    }
+
+    const hasData = Object.values(counts).some(count => count > 0);
+    if (!hasData) return;
+
     window.statsChart = new Chart(ctx, {
       type: "bar",
       data: {
         labels: Object.keys(counts),
         datasets: [{
-          label: "# of Books",
+          label: "Books by Status",
           data: Object.values(counts),
           backgroundColor: ["#ffcccc", "#fff3cd", "#d4edda"]
         }]
@@ -136,6 +147,12 @@ document.addEventListener("DOMContentLoaded", () => {
         responsive: true,
         plugins: {
           legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            precision: 0
+          }
         }
       }
     });
@@ -178,7 +195,6 @@ document.addEventListener("DOMContentLoaded", () => {
     notesModal.classList.remove("hidden");
   }
 
-  // ✅ Make card functions globally accessible
   window.editBook = editBook;
   window.deleteBook = deleteBook;
   window.showNotes = showNotes;
