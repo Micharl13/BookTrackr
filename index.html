@@ -24,6 +24,8 @@
         <option value="rating">Rating</option>
         <option value="status">Status</option>
         <option value="date">Date Added</option>
+        <option value="recentlyUpdated">Recently Updated</option>
+        <option value="recentlyRead">Recently Read</option>
       </select>
       <select id="filter-status">
         <option value="All">All</option>
@@ -33,25 +35,31 @@
       </select>
       <button id="toggle-theme">🌓</button>
       <button id="show-form">➕ Add Book</button>
+      <button id="toggle-view">📚 Shelf View</button>
+      <button id="toggle-fields">⚙️ Customize Fields</button>
     </div>
 
     <div id="active-filters" class="chip-bar"></div>
 
     <form id="book-form" class="hidden">
-      <input type="text" id="title" placeholder="Book Title" required />
-      <input type="text" id="author" placeholder="Author" required />
-      <input type="text" id="series" placeholder="Series" />
+      <input type="text" id="title" placeholder="Book Title" required autocomplete="off" />
+      <input type="text" id="author" placeholder="Author" required autocomplete="off" />
+      <input type="text" id="series" placeholder="Series" class="optional-field" />
       <input type="text" id="bookNumber" placeholder="Book Number" />
       <input type="text" id="genre" placeholder="Genre" />
       <input type="text" id="tags" placeholder="Tags (comma-separated)" />
-      <input type="text" id="pages" placeholder="Pages Read / Total (e.g. 100/300)" />
+      <label>Pages Read: <input type="number" id="pages-read" min="0" value="0" /></label>
+      <label>Total Pages: <input type="number" id="pages-total" min="1" value="1" /></label>
+      <input type="range" id="progress-slider" min="0" max="100" value="0" step="1" />
       <select id="status">
         <option value="To Read">To Read</option>
         <option value="Reading">Reading</option>
         <option value="Finished">Finished</option>
       </select>
       <input type="number" id="rating" placeholder="Rating (1–5)" min="1" max="5" />
-      <textarea id="notes" placeholder="Notes..."></textarea>
+      <textarea id="notes" placeholder="Notes..." class="optional-field"></textarea>
+      <label>Start Date: <input type="date" id="start-date" /></label>
+      <label>Finish Date: <input type="date" id="finish-date" /></label>
       <input type="url" id="cover-url" placeholder="Cover Image URL" />
       <img id="cover-preview" alt="Preview" class="hidden" />
       <button type="submit">Add / Save Book</button>
@@ -63,13 +71,14 @@
       <input type="file" id="import-json" accept=".json" />
     </div>
 
+    <div id="pagination-controls"></div>
+
+    <div id="book-list" class="book-list-grid"></div>
+
     <div id="dashboard">
-      <h2>📊 Stats Dashboard</h2>
+      <h2>📊 Book Stats</h2>
       <canvas id="statsChart"></canvas>
     </div>
-
-    <div id="pagination-controls"></div>
-    <div id="book-list"></div>
   </div>
 
   <!-- Notes Modal -->
@@ -84,6 +93,23 @@
       </div>
     </div>
   </div>
+
+  <!-- Delete Confirm Modal -->
+  <div id="delete-confirm-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Confirm Delete</h3>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this book?</p>
+        <button id="confirm-delete">Yes, Delete</button>
+        <button id="cancel-delete">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Autocomplete Suggestions -->
+  <div id="autocomplete-suggestions" class="autocomplete hidden"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
