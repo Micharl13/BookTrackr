@@ -5,60 +5,204 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>BookTrackr</title>
   <link rel="stylesheet" href="styles.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
   <header>
-    <h1>BookTrackr</h1>
-    <button id="toggleViewBtn">📚 Toggle View</button>
-    <input type="text" id="searchBar" placeholder="Search books..." />
+    <div class="header-content">
+      <div class="logo">
+        <i class="fas fa-book-open"></i>
+        <h1>BookTrackr</h1>
+      </div>
+      <div class="header-controls">
+        <button id="toggleViewBtn" class="btn btn-secondary">
+          <i class="fas fa-th-large"></i>
+          <span>Grid View</span>
+        </button>
+        <div class="search-container">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchBar" placeholder="Search books, authors, or tags..." />
+        </div>
+      </div>
+    </div>
   </header>
 
   <main>
-    <section id="bookFormSection">
-      <form id="bookForm">
-        <input type="text" id="title" placeholder="Title" required />
-        <input type="text" id="author" placeholder="Author" required />
-        <input type="text" id="series" placeholder="Series (optional)" />
-        <input type="text" id="bookNumber" placeholder="Book #" />
-        <input type="text" id="genre" placeholder="Genre" />
-        <input type="text" id="tags" placeholder="Tags (comma-separated)" />
-        <input type="number" id="pages" placeholder="Total Pages" min="1" />
-        <input type="number" id="progress" placeholder="Pages Read" min="0" />
-        <input type="date" id="startDate" placeholder="Start Date" />
-        <input type="date" id="finishDate" placeholder="Finish Date" />
-        <select id="status">
-          <option value="To Read">To Read</option>
-          <option value="Reading">Reading</option>
-          <option value="Finished">Finished</option>
-        </select>
-        <input type="number" id="rating" placeholder="Rating (1-5)" min="1" max="5"/>
-        <textarea id="notes" placeholder="Notes (optional)"></textarea>
-        <input type="url" id="coverUrl" placeholder="Cover Image URL (optional)" />
-        <button type="submit">Add Book</button>
+    <section id="bookFormSection" class="card">
+      <div class="section-header">
+        <h2><i class="fas fa-plus-circle"></i> Add New Book</h2>
+        <button id="toggleFormBtn" class="btn btn-ghost">
+          <i class="fas fa-chevron-up"></i>
+        </button>
+      </div>
+      
+      <form id="bookForm" class="book-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="title">Title *</label>
+            <input type="text" id="title" placeholder="Enter book title" required />
+          </div>
+          <div class="form-group">
+            <label for="author">Author *</label>
+            <input type="text" id="author" placeholder="Enter author name" required />
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="series">Series</label>
+            <input type="text" id="series" placeholder="Series name (optional)" />
+          </div>
+          <div class="form-group">
+            <label for="bookNumber">Book #</label>
+            <input type="number" id="bookNumber" placeholder="1" min="1" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="genre">Genre</label>
+            <input type="text" id="genre" placeholder="Fiction, Mystery, etc." />
+          </div>
+          <div class="form-group">
+            <label for="tags">Tags</label>
+            <input type="text" id="tags" placeholder="fantasy, adventure, classic" />
+            <small>Separate with commas</small>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pages">Total Pages</label>
+            <input type="number" id="pages" placeholder="300" min="1" />
+          </div>
+          <div class="form-group">
+            <label for="progress">Pages Read</label>
+            <input type="number" id="progress" placeholder="0" min="0" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" />
+          </div>
+          <div class="form-group">
+            <label for="finishDate">Finish Date</label>
+            <input type="date" id="finishDate" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status">
+              <option value="To Read">📚 To Read</option>
+              <option value="Reading">📖 Reading</option>
+              <option value="Finished">✅ Finished</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="rating">Rating</label>
+            <div class="rating-container">
+              <select id="rating">
+                <option value="">No rating</option>
+                <option value="1">⭐ 1 star</option>
+                <option value="2">⭐⭐ 2 stars</option>
+                <option value="3">⭐⭐⭐ 3 stars</option>
+                <option value="4">⭐⭐⭐⭐ 4 stars</option>
+                <option value="5">⭐⭐⭐⭐⭐ 5 stars</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="coverUrl">Cover Image URL</label>
+            <input type="url" id="coverUrl" placeholder="https://example.com/book-cover.jpg" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="notes">Notes</label>
+            <textarea id="notes" placeholder="Your thoughts about the book..." rows="3"></textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary submit-btn">
+          <i class="fas fa-plus"></i>
+          Add Book to Library
+        </button>
       </form>
     </section>
 
-    <section id="bookStats">
-      <h2>📊 Your Reading Stats</h2>
+    <section id="bookStats" class="card">
+      <h2><i class="fas fa-chart-bar"></i> Reading Statistics</h2>
       <div id="statsContent">
-        <!-- Stats dynamically generated -->
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-number" id="totalBooks">0</div>
+            <div class="stat-label">Total Books</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="readBooks">0</div>
+            <div class="stat-label">Books Read</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="currentlyReading">0</div>
+            <div class="stat-label">Currently Reading</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="totalPages">0</div>
+            <div class="stat-label">Pages Read</div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section id="bookListSection">
-      <table id="bookTable">
+    <section id="bookListSection" class="card">
+      <div class="section-header">
+        <h2><i class="fas fa-books"></i> Your Library</h2>
+        <div class="view-controls">
+          <button id="sortBtn" class="btn btn-ghost">
+            <i class="fas fa-sort"></i>
+            Sort
+          </button>
+        </div>
+      </div>
+
+      <div id="emptyState" class="empty-state hidden">
+        <i class="fas fa-book-open"></i>
+        <h3>No books in your library yet</h3>
+        <p>Add your first book to get started tracking your reading journey!</p>
+      </div>
+
+      <table id="bookTable" class="book-table">
         <thead>
           <tr>
             <th data-sort="cover">Cover</th>
-            <th data-sort="title">Title</th>
-            <th data-sort="author">Author</th>
+            <th data-sort="title" class="sortable">
+              Title <i class="fas fa-sort"></i>
+            </th>
+            <th data-sort="author" class="sortable">
+              Author <i class="fas fa-sort"></i>
+            </th>
             <th data-sort="series">Series</th>
-            <th data-sort="status">Status</th>
-            <th data-sort="rating">Rating</th>
+            <th data-sort="status" class="sortable">
+              Status <i class="fas fa-sort"></i>
+            </th>
+            <th data-sort="rating" class="sortable">
+              Rating <i class="fas fa-sort"></i>
+            </th>
             <th data-sort="pages">Pages</th>
             <th data-sort="progress">Progress</th>
             <th data-sort="tags">Tags</th>
-            <th data-sort="dateAdded">Date Added</th>
+            <th data-sort="dateAdded" class="sortable">
+              Date Added <i class="fas fa-sort"></i>
+            </th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -68,21 +212,46 @@
       </table>
 
       <!-- Grid view -->
-      <div id="bookGrid" class="hidden">
+      <div id="bookGrid" class="book-grid hidden">
         <!-- Books injected here as cards -->
       </div>
     </section>
 
-    <!-- Loader for infinite scroll -->
-    <div id="infiniteScrollTrigger"></div>
+    <!-- Loading indicator -->
+    <div id="infiniteScrollTrigger" class="loading-trigger">
+      <div class="spinner"></div>
+    </div>
   </main>
 
   <!-- Confirmation Modal -->
-  <div id="confirmModal" class="hidden">
+  <div id="confirmModal" class="modal hidden">
+    <div class="modal-overlay"></div>
     <div class="modal-content">
-      <p>Are you sure you want to delete this book?</p>
-      <button id="confirmDeleteBtn">Yes</button>
-      <button id="cancelDeleteBtn">Cancel</button>
+      <div class="modal-header">
+        <i class="fas fa-exclamation-triangle text-warning"></i>
+        <h3>Delete Book</h3>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this book from your library? This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelDeleteBtn" class="btn btn-secondary">
+          <i class="fas fa-times"></i>
+          Cancel
+        </button>
+        <button id="confirmDeleteBtn" class="btn btn-danger">
+          <i class="fas fa-trash"></i>
+          Delete Book
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div id="toast" class="toast hidden">
+    <div class="toast-content">
+      <i class="toast-icon"></i>
+      <span class="toast-message"></span>
     </div>
   </div>
 
