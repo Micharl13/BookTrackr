@@ -2,116 +2,90 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>BookTrackr</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
-  <div class="container">
-    <h1>📚 BookTrackr</h1>
+  <header>
+    <h1>BookTrackr</h1>
+    <button id="toggleViewBtn">📚 Toggle View</button>
+    <input type="text" id="searchBar" placeholder="Search books..." />
+  </header>
 
-    <div class="controls">
-      <input type="text" id="search" placeholder="Search books..." />
-      <select id="sort">
-        <option value="default">Sort By</option>
-        <option value="title">Title</option>
-        <option value="author">Author</option>
-        <option value="series">Series</option>
-        <option value="bookNumber">Book Number</option>
-        <option value="genre">Genre</option>
-        <option value="tags">Tags</option>
-        <option value="rating">Rating</option>
-        <option value="status">Status</option>
-        <option value="date">Date Added</option>
-        <option value="recentlyUpdated">Recently Updated</option>
-        <option value="recentlyRead">Recently Read</option>
-      </select>
-      <select id="filter-status">
-        <option value="All">All</option>
-        <option value="To Read">To Read</option>
-        <option value="Reading">Reading</option>
-        <option value="Finished">Finished</option>
-      </select>
-      <button id="toggle-theme">🌓</button>
-      <button id="show-form">➕ Add Book</button>
-      <button id="toggle-view">📚 Shelf View</button>
-      <button id="toggle-fields">⚙️ Customize Fields</button>
-    </div>
+  <main>
+    <section id="bookFormSection">
+      <form id="bookForm">
+        <input type="text" id="title" placeholder="Title" required />
+        <input type="text" id="author" placeholder="Author" required />
+        <input type="text" id="series" placeholder="Series (optional)" />
+        <input type="text" id="bookNumber" placeholder="Book #" />
+        <input type="text" id="genre" placeholder="Genre" />
+        <input type="text" id="tags" placeholder="Tags (comma-separated)" />
+        <input type="number" id="pages" placeholder="Total Pages" min="1" />
+        <input type="number" id="progress" placeholder="Pages Read" min="0" />
+        <input type="date" id="startDate" placeholder="Start Date" />
+        <input type="date" id="finishDate" placeholder="Finish Date" />
+        <select id="status">
+          <option value="To Read">To Read</option>
+          <option value="Reading">Reading</option>
+          <option value="Finished">Finished</option>
+        </select>
+        <input type="number" id="rating" placeholder="Rating (1-5)" min="1" max="5"/>
+        <textarea id="notes" placeholder="Notes (optional)"></textarea>
+        <input type="url" id="coverUrl" placeholder="Cover Image URL (optional)" />
+        <button type="submit">Add Book</button>
+      </form>
+    </section>
 
-    <div id="active-filters" class="chip-bar"></div>
+    <section id="bookStats">
+      <h2>📊 Your Reading Stats</h2>
+      <div id="statsContent">
+        <!-- Stats dynamically generated -->
+      </div>
+    </section>
 
-    <form id="book-form" class="hidden">
-      <input type="text" id="title" placeholder="Book Title" required autocomplete="off" />
-      <input type="text" id="author" placeholder="Author" required autocomplete="off" />
-      <input type="text" id="series" placeholder="Series" class="optional-field" />
-      <input type="text" id="bookNumber" placeholder="Book Number" />
-      <input type="text" id="genre" placeholder="Genre" />
-      <input type="text" id="tags" placeholder="Tags (comma-separated)" />
-      <label>Pages Read: <input type="number" id="pages-read" min="0" value="0" /></label>
-      <label>Total Pages: <input type="number" id="pages-total" min="1" value="1" /></label>
-      <input type="range" id="progress-slider" min="0" max="100" value="0" step="1" />
-      <select id="status">
-        <option value="To Read">To Read</option>
-        <option value="Reading">Reading</option>
-        <option value="Finished">Finished</option>
-      </select>
-      <input type="number" id="rating" placeholder="Rating (1–5)" min="1" max="5" />
-      <textarea id="notes" placeholder="Notes..." class="optional-field"></textarea>
-      <label>Start Date: <input type="date" id="start-date" /></label>
-      <label>Finish Date: <input type="date" id="finish-date" /></label>
-      <input type="url" id="cover-url" placeholder="Cover Image URL" />
-      <img id="cover-preview" alt="Preview" class="hidden" />
-      <button type="submit">Add / Save Book</button>
-      <button type="button" id="cancel-edit">Cancel</button>
-    </form>
+    <section id="bookListSection">
+      <table id="bookTable">
+        <thead>
+          <tr>
+            <th data-sort="cover">Cover</th>
+            <th data-sort="title">Title</th>
+            <th data-sort="author">Author</th>
+            <th data-sort="series">Series</th>
+            <th data-sort="status">Status</th>
+            <th data-sort="rating">Rating</th>
+            <th data-sort="pages">Pages</th>
+            <th data-sort="progress">Progress</th>
+            <th data-sort="tags">Tags</th>
+            <th data-sort="dateAdded">Date Added</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="bookTableBody">
+          <!-- Book rows injected here -->
+        </tbody>
+      </table>
 
-    <div class="import-export">
-      <button id="export-json">Export JSON</button>
-      <input type="file" id="import-json" accept=".json" />
-    </div>
+      <!-- Grid view -->
+      <div id="bookGrid" class="hidden">
+        <!-- Books injected here as cards -->
+      </div>
+    </section>
 
-    <div id="book-list" class="book-list-grid"></div>
-    <div id="infinite-scroll-trigger"></div>
+    <!-- Loader for infinite scroll -->
+    <div id="infiniteScrollTrigger"></div>
+  </main>
 
-    <div id="dashboard">
-      <h2>📊 Book Stats</h2>
-      <canvas id="statsChart"></canvas>
-    </div>
-  </div>
-
-  <!-- Notes Modal -->
-  <div id="notes-modal" class="modal hidden">
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" class="hidden">
     <div class="modal-content">
-      <div class="modal-header">
-        <h3 id="modal-book-title">Notes</h3>
-        <button class="close-modal" id="close-notes-modal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div id="modal-notes-content"></div>
-      </div>
+      <p>Are you sure you want to delete this book?</p>
+      <button id="confirmDeleteBtn">Yes</button>
+      <button id="cancelDeleteBtn">Cancel</button>
     </div>
   </div>
 
-  <!-- Delete Confirm Modal -->
-  <div id="delete-confirm-modal" class="modal hidden">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Confirm Delete</h3>
-      </div>
-      <div class="modal-body">
-        <p>Are you sure you want to delete this book?</p>
-        <button id="confirm-delete">Yes, Delete</button>
-        <button id="cancel-delete">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Autocomplete Suggestions -->
-  <div id="autocomplete-suggestions" class="autocomplete hidden"></div>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
