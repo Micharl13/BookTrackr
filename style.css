@@ -1,380 +1,178 @@
-:root {
-  --bg: #f0f0f0;
-  --text: #000;
-  --card-bg: #fff;
-  --accent: #4caf50;
-  --danger: #c0392b;
-}
-
+/* Reset and base styles */
 body {
-  font-family: 'Raleway', sans-serif;
+  font-family: sans-serif;
   margin: 0;
-  padding: 1rem;
-  background: var(--bg);
-  color: var(--text);
-  transition: background 0.3s, color 0.3s;
-  background-image: url('https://www.transparenttextures.com/patterns/white-wall-3.png');
-}
-
-body.dark {
-  --bg: #121212;
-  --text: #f5f5f5;
-  --card-bg: #1e1e1e;
-}
-
-.container {
-  max-width: 900px;
-  margin: auto;
-}
-
-h1 {
-  background: linear-gradient(to right, #ff8a00, #e52e71);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-size: 2.5rem;
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-input, select, textarea, button {
-  display: block;
-  margin: 0.5rem 0;
-  width: 100%;
-  padding: 0.6rem;
-  border-radius: 0.4rem;
-  border: 1px solid #ccc;
-  font-family: inherit;
-  font-size: 1rem;
-  transition: border-color 0.3s;
-  box-sizing: border-box;
-}
-
-input:focus, textarea:focus, select:focus {
-  border-color: var(--accent);
-  outline: none;
-}
-
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  align-items: center;
-}
-
-.controls > * {
-  flex: 1;
-  min-width: 120px;
-  margin: 0;
-}
-
-#book-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-#book-form textarea,
-#book-form button,
-#book-form #cancel-edit,
-#book-form #cover-preview,
-#book-form label,
-#book-form input[type="range"] {
-  grid-column: span 2;
-}
-
-.optional-field.hidden {
-  display: none;
-}
-
-#book-list.book-list-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
-}
-
-#book-list.shelf-view .book {
-  font-size: 0;
   padding: 0;
-  box-shadow: none;
-  border-radius: 0;
+  background: #f2f2f2;
+  color: #333;
 }
 
-#book-list.shelf-view .book img {
-  width: 100%;
-  height: auto;
-  max-height: 260px;
-  border-radius: 0.5rem;
-  margin: 0;
-  object-fit: cover;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-
-.book {
-  background: var(--card-bg);
-  padding: 0.7rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.08);
-  position: relative;
-  transition: transform 0.2s, box-shadow 0.3s;
-  font-size: 0.9rem;
-}
-
-.book:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
-}
-
-.book h3 {
-  font-size: 1rem;
-  margin: 0.3rem 0;
-  font-weight: 600;
-}
-
-.book p {
-  font-size: 0.75rem;
-  margin: 0.1rem 0;
-}
-
-.book img {
-  width: 100%;
-  max-height: 160px;
-  object-fit: contain;
-  border-radius: 0.3rem;
-  margin-bottom: 0.3rem;
-}
-
-.book-actions {
-  margin-top: 0.3rem;
-  display: flex;
-  gap: 0.3rem;
-}
-
-.book-actions button {
-  flex: 1;
-  margin: 0;
-  padding: 0.3rem;
-  font-size: 0.7rem;
-}
-
-.status-badge {
-  font-size: 0.7rem;
-  padding: 0.2em 0.5em;
-  margin-top: 0.2em;
-  border-radius: 0.3rem;
-  display: inline-block;
-}
-
-.progress-bar {
-  height: 6px;
-  margin-top: 4px;
-  background: #eee;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.progress {
-  height: 100%;
-  background: var(--accent);
-  transition: width 0.3s;
-}
-
-.status-to-read {
-  background-color: #ffcccc;
-  color: #a00;
-}
-
-.status-reading {
-  background-color: #fff3cd;
-  color: #856404;
-}
-
-.status-finished {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.tags {
+header {
+  background: #4a90e2;
+  color: white;
+  padding: 1rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem;
-  margin-top: 0.3rem;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.tag {
-  background: #e3f2fd;
-  color: #1976d2;
-  padding: 0.2rem 0.5rem;
-  border-radius: 0.3rem;
-  font-size: 0.6rem;
-  font-weight: 500;
-  cursor: pointer;
+header h1 {
+  margin: 0;
+  font-size: 1.5rem;
 }
 
-.tag:hover {
-  background: #bbdefb;
+header input {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  margin-left: 1rem;
+  flex-grow: 1;
+  max-width: 300px;
 }
 
-body.dark .tag {
-  background: #263238;
-  color: #81c784;
+main {
+  padding: 1rem;
 }
 
-button {
-  cursor: pointer;
-  transition: transform 0.1s ease;
-}
-
-button:active {
-  transform: scale(0.97);
-}
-
-.import-export {
-  margin: 1rem 0;
+form {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
-  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
 }
 
-.import-export button,
-.import-export input {
-  flex: 1;
-  min-width: 200px;
+form input,
+form select,
+form textarea,
+form button {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  flex: 1 1 200px;
 }
 
+form button {
+  background-color: #4a90e2;
+  color: white;
+  cursor: pointer;
+}
+
+#bookStats {
+  margin-bottom: 2rem;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+#bookTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+#bookTable th,
+#bookTable td {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+#bookTable img {
+  max-height: 80px;
+  max-width: 60px;
+}
+
+#bookGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.book-card {
+  background: white;
+  padding: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.book-card img {
+  max-height: 160px;
+  margin-bottom: 0.5rem;
+}
+
+/* Hide table/grid toggle */
 .hidden {
   display: none !important;
 }
 
-.chip-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+/* Tags */
+.tag {
+  display: inline-block;
+  background: #e0e0e0;
+  color: #333;
+  padding: 0.2rem 0.5rem;
+  margin: 0 0.2rem 0.2rem 0;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
 }
 
-.chip {
-  background: #eee;
-  border-radius: 999px;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.85rem;
+/* Status color badges */
+.status-To\ Read {
+  color: #555;
+}
+.status-Reading {
+  color: #d58512;
+}
+.status-Finished {
+  color: #5cb85c;
+}
+
+/* Progress bar */
+.progress-bar {
+  height: 6px;
+  background: #ddd;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 0.25rem;
+}
+.progress-bar .progress {
+  height: 100%;
+  background: #4a90e2;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* Infinite scroll trigger */
+#infiniteScrollTrigger {
+  height: 50px;
+  margin: 1rem auto;
+}
+
+/* Modal */
+#confirmModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-}
-
-.chip button {
-  background: none;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-  padding: 0;
-  font-size: 1rem;
-  color: var(--danger);
-  width: auto;
-  margin: 0;
-}
-
-/* Infinite scroll loading placeholder (optional) */
-#infinite-scroll-trigger {
-  width: 100%;
-  height: 60px;
-}
-
-#dashboard {
-  margin: 2rem 0;
-}
-
-#dashboard canvas {
-  width: 100%;
-  max-width: 400px;
-  height: 200px;
-  margin: auto;
-  display: block;
-}
-
-.autocomplete {
-  position: absolute;
-  background: #fff;
-  border: 1px solid #ccc;
-  max-height: 200px;
-  overflow-y: auto;
+  justify-content: center;
   z-index: 999;
-  padding: 0.5rem;
-  border-radius: 0.3rem;
 }
-
-.autocomplete div {
-  padding: 0.3rem;
-  cursor: pointer;
+.modal-content {
+  background: white;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  text-align: center;
 }
-
-.autocomplete div:hover {
-  background: #eee;
-}
-
-body.dark input, body.dark select, body.dark textarea {
-  background: #333;
-  color: #f5f5f5;
-  border-color: #666;
-}
-
-body.dark button {
-  background: #333;
-  color: #f5f5f5;
-  border-color: #666;
-}
-
-body.dark button:hover {
-  background: #444;
-}
-
-body.dark .chip {
-  background: #333;
-  color: #f5f5f5;
-}
-
-body.dark .chip button {
-  color: #f88;
-}
-
-body.dark .autocomplete {
-  background: #333;
-  color: #f5f5f5;
-  border-color: #666;
-}
-
-@media (max-width: 768px) {
-  .controls {
-    flex-direction: column;
-  }
-
-  #book-form {
-    grid-template-columns: 1fr;
-  }
-
-  #book-form textarea,
-  #book-form button,
-  #book-form #cancel-edit,
-  #cover-preview,
-  #book-form label,
-  #book-form input[type="range"] {
-    grid-column: span 1;
-  }
-
-  #book-list {
-    grid-template-columns: 1fr;
-  }
-
-  .book-actions {
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-
-  .modal-content {
-    width: 95%;
-    max-height: 90vh;
-  }
+.modal-content button {
+  margin: 0.5rem;
 }
